@@ -60,7 +60,7 @@ This project was developed with the following platforms:
 
 ### Steps
 
-1. From the FPGA side, import SPI_Nios_project in Quartus Prime.
+1. From the FPGA side, import "SPI_Nios_project" in Quartus Prime.
    You will find a main code employing two components:
    - The SPI master module;
    - The Nios II soft processor.
@@ -76,7 +76,7 @@ This project was developed with the following platforms:
    
     Then, right-click on the soft folder. Click on Build Project and Run As -> Nios II Hardware to run the code.
 
-3. From the DSP side, import spi_adc_minimized_delay in Code Composer Studio. Then, Build and Flash.
+3. From the DSP side, import "spi_adc_minimized_delay" in Code Composer Studio. Then, Build and Flash.
 
 ---
 
