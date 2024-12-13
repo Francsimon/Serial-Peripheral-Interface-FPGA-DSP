@@ -17,13 +17,14 @@
  * SPI_RX_REGISTER_4_BASE
  * SPI_RX_REGISTER_5_BASE
  * By writing a value into DELAY_SPI_BASE, we set the delay between SPI-CS and the first SPI-CLK cycle.
- * The delay is equal to DELAY_SPI_BASE * the system clock period
+ * The delay is equal to DELAY_SPI_BASE * T_clk of the system clock
  * By writing a value into START_SPI_REGISTER_BASE, the SPI communication is triggered for the set modules.
  * By reading END_SPI_BASE, we monitor the end of the communication.
  *
- * In the example code, a delay is set and a value is written into SPI_TX_REGISTER_0_BASE to be transmitted via the module 0.
- * The start operation is given only for module 0.
- * After the end of the communication, the data received from SPI slave connected to the module 0 is printed.
+ * In the example code,
+ *
+ * This program calculates the factorial of a given non-negative integer.
+ * It handles user input, checks for invalid or negative inputs, and computes the factorial using an iterative approach.
  */
 #include <stdio.h>
 
@@ -44,19 +45,19 @@ int main()
 	// SETTINGS
 	IOWR_ALTERA_AVALON_PIO_DATA(DELAY_SPI_BASE, 60);// SPI delay between cs assertion and 1th spi clk pulse
 
-	IOWR_ALTERA_AVALON_PIO_DATA(SPI_TX_REGISTER_0_BASE, 10);// Write the data to be sent via SPI 0
+	IOWR_ALTERA_AVALON_PIO_DATA(SPI_TX_REGISTER_0_BASE, 10);// Write to SPI register 0
 
 	// SPI COMMUNICATION
-	IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_REGISTER_BASE, 0b000001); // Start the SPI communications
+	IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_REGISTER_BASE, 0b000001); // start spi communications
 	do{
 		status_spi=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
 	   }
-	while( status_spi==0 );// Wait until the end of the communications
+	while( status_spi==0 );// wait end communications
 
-	int spi_data = IORD_ALTERA_AVALON_PIO_DATA(SPI_RX_REGISTER_0_BASE); // Read the data received by SPI 0
+	int spi_data = IORD_ALTERA_AVALON_PIO_DATA(SPI_RX_REGISTER_0_BASE); // end spi communications
 
 
-	printf("SPI register 0 data: %u\n", spi_data); // Prints in decimal format
+	printf("SPI register 0 data: %u\n", spi_data); // Prints in hexadecimal format
 
 	while(1){}
 

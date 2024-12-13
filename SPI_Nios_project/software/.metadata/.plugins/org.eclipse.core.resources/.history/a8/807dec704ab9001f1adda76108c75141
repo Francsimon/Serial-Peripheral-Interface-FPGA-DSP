@@ -1,0 +1,59 @@
+/*
+ * Author: [Francesco Simonetti]
+ * Date: [13/12/2024]
+ * Description: This program drives six SPI master modules.
+ * The data to be transmitted can be written in the registers:
+ * SPI_TX_REGISTER_0_BASE
+ * SPI_TX_REGISTER_1_BASE
+ * SPI_TX_REGISTER_2_BASE
+ * SPI_TX_REGISTER_3_BASE
+ * SPI_TX_REGISTER_4_BASE
+ * SPI_TX_REGISTER_5_BASE
+ * The received data can be written from registers:
+ * SPI_RX_REGISTER_0_BASE
+ * SPI_RX_REGISTER_1_BASE
+ * SPI_RX_REGISTER_2_BASE
+ * SPI_RX_REGISTER_3_BASE
+ * SPI_RX_REGISTER_4_BASE
+ * SPI_RX_REGISTER_5_BASE
+ * By writing a value into START_SPI_REGISTER_BASE, the SPI communication is triggered for the set modules
+ * This program calculates the factorial of a given non-negative integer.
+ * It handles user input, checks for invalid or negative inputs, and computes the factorial using an iterative approach.
+ */
+#include <stdio.h>
+
+#include "io.h"
+#include "alt_types.h"
+#include "sys/alt_irq.h"
+#include "sys/alt_stdio.h"
+#include "system.h"
+#include <unistd.h>
+#include <string.h>
+
+#include <altera_avalon_pio_regs.h>
+
+int status_spi;
+
+int main()
+{
+	// SETTINGS
+	IOWR_ALTERA_AVALON_PIO_DATA(DELAY_SPI_BASE, 60);// SPI delay between cs assertion and 1th spi clk pulse
+
+	IOWR_ALTERA_AVALON_PIO_DATA(SPI_TX_REGISTER_0_BASE, 10);// Write to SPI register 0
+
+	// SPI COMMUNICATION
+	IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_REGISTER_BASE, 0b000001); // start spi communications
+	do{
+		status_spi=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+	   }
+	while( status_spi==0 );// wait end communications
+
+	int spi_data = IORD_ALTERA_AVALON_PIO_DATA(SPI_RX_REGISTER_0_BASE); // end spi communications
+
+
+	printf("SPI register 0 data: %u\n", spi_data); // Prints in hexadecimal format
+
+	while(1){}
+
+	return 0;
+}

@@ -44,7 +44,7 @@ int main()
 	// SETTINGS
 	IOWR_ALTERA_AVALON_PIO_DATA(DELAY_SPI_BASE, 60);// SPI delay between cs assertion and 1th spi clk pulse
 
-	IOWR_ALTERA_AVALON_PIO_DATA(SPI_TX_REGISTER_0_BASE, 10);// Write the data to be sent via SPI 0
+	IOWR_ALTERA_AVALON_PIO_DATA(SPI_TX_REGISTER_0_BASE, 10);// Write to SPI register 0
 
 	// SPI COMMUNICATION
 	IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_REGISTER_BASE, 0b000001); // Start the SPI communications
