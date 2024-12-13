@@ -12,8 +12,7 @@ in the DSP and the SPI transission of the data from DSP to FPGA. Refer to the pu
 2. [Platform Targets](#platform-targets)
 3. [Installation](#installation)
 4. [Usage Instructions](#usage-instructions)
-5. [Contributing](#contributing)
-6. [License](#license)
+5. [For More Details](#for-more-details)
 
 ---
 
@@ -94,11 +93,8 @@ You can modify the provided code to develop your own implementation, taking adva
 
 Refer to paper published by the author. 
 
-ORCID: https://orcid.org/0000-0002-1135-052X) 
+ORCID: https://orcid.org/0000-0002-1135-052X
 
 ResearchGate: https://www.researchgate.net/profile/Francesco_Simonetti4
 
-
-
-Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing Guidelines](CONTRIBUTING.md).
 
