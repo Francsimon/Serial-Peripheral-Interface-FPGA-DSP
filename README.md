@@ -46,19 +46,18 @@ For example:
 
 ## Platform Targets
 
-This project is compatible with the following platforms:
+This project was developed with the following platforms:
 
-- **Desktop**:
-  - Windows (10 and later)
-  - macOS (11 Big Sur and later)
-  - Linux (Ubuntu 20.04 and later, Fedora 34+)
+- **Desktop PC**:
+  - Linux Ubuntu 20.04
+  - Quartus Prime Version 17.1.0 Lite Edition
+  - Code Composer Studio 12.7.0
 
-- **Mobile**:
-  - iOS (14 and later)
-  - Android (10 and later)
+- **FPGA**:
+  - Altera Cyclone V 5CEBA7F31C8N
 
-- **Web**:
-  - Latest versions of Chrome, Firefox, Safari, and Edge.
+- **DSP**:
+  - Texas Instrument TMS320 F28377SPTPT
 
 ---
 
