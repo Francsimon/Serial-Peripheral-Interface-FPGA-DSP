@@ -38,10 +38,6 @@ The SPI master module on the FPGA was designed to wait for a delay between the S
 
 This sample & communication scheme resulted in minimizing the delays in the ADC sampling & SPI transmission of the data from DSP to FPGA.
 
-For example:
-
-> Project Name is a cross-platform tool designed to streamline task management and increase productivity. It supports task automation, team collaboration, and integrates with popular third-party services.
-
 ---
 
 ## Platform Targets
@@ -88,20 +84,21 @@ This project was developed with the following platforms:
 ## Usage Instructions
 
 From the Eclipse window opened through Quartus Prime, you can modify the C code executed by Nios II. You can send data via SPI, read received data and start communications in parallel.
+
 From Code Composer Studio, you can adapt the code to your implementation by employing the communication scheme that minimizes the sample & transmission delays.
 You can modify the provided code to develop your own implementation, taking advantage of the optimized sample & transmission of the data.
 
 ---
 
-## Contributing
+## For More Details
 
-We welcome contributions! To contribute:
+Refer to paper published by the author. 
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Make your changes and commit them (`git commit -m 'Add feature'`).
-4. Push to your branch (`git push origin feature-name`).
-5. Open a Pull Request.
+ORCID: https://orcid.org/0000-0002-1135-052X) 
+
+ResearchGate: https://www.researchgate.net/profile/Francesco_Simonetti4
+
+
 
 Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing Guidelines](CONTRIBUTING.md).
 
