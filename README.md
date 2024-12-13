@@ -63,40 +63,21 @@ This project was developed with the following platforms:
 
 ## Installation
 
-### Prerequisites
-
-Before installing, ensure you have the following installed:
-
-- [Node.js](https://nodejs.org/) (v16.0.0 or later)
-- [Git](https://git-scm.com/)
-- A code editor like [Visual Studio Code](https://code.visualstudio.com/).
-
 ### Steps
 
-1. Clone the repository:
+1. From FPGA side, import SPI_Nios_project in Quartus Prime.
+   You will find a main code employing two components:
+   - The SPI master module;
+   - The Nios II soft processor.
+   You can have a look at the Platform Designer to see the connections among Nios II, JTAG programmer, RAM memory and the main registers.
+   You can have a look at the SPI master module to understand what are the inputs and the possible operating modes (clock phase and polarities, delays, word length).
 
-   ```bash
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
-   ```
+2. In the Quartus Prime window, navigate to Tools -> Nios II Software Build Tools for Eclipse.
+   Select ./SPI_NIOS_project/software as workspace.
+   In the Project Explorer on the left, right click on the soft_bsp folder. Click on Nios -> Generate BSP.
+   Then, right click on the soft folder. Click on Build Project, and Run As -> Nios II Hardware to run the code.
 
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Build the project (if applicable):
-
-   ```bash
-   npm run build
-   ```
-
-4. Run the project:
-
-   ```bash
-   npm start
-   ```
+3. From DSP side, import spi_adc_minimized_delay in Code Composer Studio. Than, Build and Flash.
 
 ---
 
