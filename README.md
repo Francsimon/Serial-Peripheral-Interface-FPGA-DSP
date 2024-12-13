@@ -1,4 +1,4 @@
-# SPI communication between FPGA and DSP
+# SPI between FPGA and DSP: Optimized Scheme for Minimum Commnuication Delay
 
 Tis project implements the serial peripheral interface (SPI) protcol between an Altera FPGA and a Texas Instruments DSP.
 The main feature of this project is the sampling and tranmission schmeme of the data, which was designed to minimize the delays between the sapling of the data from the ADC
