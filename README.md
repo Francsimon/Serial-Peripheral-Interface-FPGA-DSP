@@ -74,8 +74,8 @@ This project was developed with the following platforms:
 
 2. In the Quartus Prime window, navigate to Tools -> Nios II Software Build Tools for Eclipse.
    Select ./SPI_NIOS_project/software as workspace.
-   In the Project Explorer, on the left, right-click on the soft_bsp folder. Click on Nios -> Generate BSP.
-   Then, right-click on the soft folder. Click on Build Project and Run As -> Nios II Hardware to run the code.
+  In the Project Explorer, on the left, right-click on the soft_bsp folder. Click on Nios -> Generate BSP.
+  Then, right-click on the soft folder. Click on Build Project and Run As -> Nios II Hardware to run the code.
 
 3. From the DSP side, import spi_adc_minimized_delay in Code Composer Studio. Then, Build and Flash.
 
