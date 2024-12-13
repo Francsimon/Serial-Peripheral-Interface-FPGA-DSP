@@ -4,8 +4,8 @@ This project implements the serial peripheral interface (SPI) protocol between a
 The main feature of this project is the sampling and transmission scheme of the data, which was designed to minimize the delays between the sapling of the data from the ADC
 in the DSP and the SPI transmission of the data from DSP to FPGA. Refer to the published paper for further details.
 It contains two files:
-1. Quartus Prime project for Altera FPGAs:
-2. Code Composer Studio project for Texas Instruments DSPs: 
+1. Quartus Prime project for Altera FPGAs: "SPI_Nios_project" folder
+2. Code Composer Studio project for Texas Instruments DSPs: "spi_adc_minimized_delay" folder
 
 ---
 
