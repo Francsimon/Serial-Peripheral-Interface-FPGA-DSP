@@ -70,12 +70,13 @@ This project was developed with the following platforms:
    - The SPI master module;
    - The Nios II soft processor.
    You can look at the Platform Designer to see the connections among Nios II, the JTAG programmer, RAM memory and the main registers.
+
    You can look at the SPI master module to understand the inputs and the possible operating modes (clock phase and polarities, delays, word length).
 
 2. In the Quartus Prime window, navigate to Tools -> Nios II Software Build Tools for Eclipse.
-   Select ./SPI_NIOS_project/software as workspace.
-  In the Project Explorer, on the left, right-click on the soft_bsp folder. Click on Nios -> Generate BSP.
-  Then, right-click on the soft folder. Click on Build Project and Run As -> Nios II Hardware to run the code.
+    Select ./SPI_NIOS_project/software as workspace.
+    In the Project Explorer, on the left, right-click on the soft_bsp folder. Click on Nios -> Generate BSP.
+    Then, right-click on the soft folder. Click on Build Project and Run As -> Nios II Hardware to run the code.
 
 3. From the DSP side, import spi_adc_minimized_delay in Code Composer Studio. Then, Build and Flash.
 
