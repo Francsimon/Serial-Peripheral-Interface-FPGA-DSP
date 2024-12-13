@@ -1,0 +1,9 @@
+18:40:32 **** Incremental Build of configuration Nios II for project soft ****
+make all 
+Info: Building ../soft_bsp/
+make --no-print-directory -C ../soft_bsp/
+[BSP build complete]
+[soft build complete]
+
+18:40:33 Build Finished (took 166ms)
+

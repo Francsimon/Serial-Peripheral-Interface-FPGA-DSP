@@ -1,0 +1,57 @@
+
+State Machine - |spi_minimized_delay_top|spi_master_module:\spi_modules_generate_dsp:5:spi_master_module_dsp_i|state_reg
+Name state_reg.end_state state_reg.store_rx_state state_reg.communication_state state_reg.init_tx_state state_reg.idle 
+state_reg.idle 0 0 0 0 0 
+state_reg.init_tx_state 0 0 0 1 1 
+state_reg.communication_state 0 0 1 0 1 
+state_reg.store_rx_state 0 1 0 0 1 
+state_reg.end_state 1 0 0 0 1 
+
+State Machine - |spi_minimized_delay_top|spi_master_module:\spi_modules_generate_dsp:4:spi_master_module_dsp_i|state_reg
+Name state_reg.end_state state_reg.store_rx_state state_reg.communication_state state_reg.init_tx_state state_reg.idle 
+state_reg.idle 0 0 0 0 0 
+state_reg.init_tx_state 0 0 0 1 1 
+state_reg.communication_state 0 0 1 0 1 
+state_reg.store_rx_state 0 1 0 0 1 
+state_reg.end_state 1 0 0 0 1 
+
+State Machine - |spi_minimized_delay_top|spi_master_module:\spi_modules_generate_dsp:3:spi_master_module_dsp_i|state_reg
+Name state_reg.end_state state_reg.store_rx_state state_reg.communication_state state_reg.init_tx_state state_reg.idle 
+state_reg.idle 0 0 0 0 0 
+state_reg.init_tx_state 0 0 0 1 1 
+state_reg.communication_state 0 0 1 0 1 
+state_reg.store_rx_state 0 1 0 0 1 
+state_reg.end_state 1 0 0 0 1 
+
+State Machine - |spi_minimized_delay_top|spi_master_module:\spi_modules_generate_dsp:2:spi_master_module_dsp_i|state_reg
+Name state_reg.end_state state_reg.store_rx_state state_reg.communication_state state_reg.init_tx_state state_reg.idle 
+state_reg.idle 0 0 0 0 0 
+state_reg.init_tx_state 0 0 0 1 1 
+state_reg.communication_state 0 0 1 0 1 
+state_reg.store_rx_state 0 1 0 0 1 
+state_reg.end_state 1 0 0 0 1 
+
+State Machine - |spi_minimized_delay_top|spi_master_module:\spi_modules_generate_dsp:1:spi_master_module_dsp_i|state_reg
+Name state_reg.end_state state_reg.store_rx_state state_reg.communication_state state_reg.init_tx_state state_reg.idle 
+state_reg.idle 0 0 0 0 0 
+state_reg.init_tx_state 0 0 0 1 1 
+state_reg.communication_state 0 0 1 0 1 
+state_reg.store_rx_state 0 1 0 0 1 
+state_reg.end_state 1 0 0 0 1 
+
+State Machine - |spi_minimized_delay_top|spi_master_module:\spi_modules_generate_dsp:0:spi_master_module_dsp_i|state_reg
+Name state_reg.end_state state_reg.store_rx_state state_reg.communication_state state_reg.init_tx_state state_reg.idle 
+state_reg.idle 0 0 0 0 0 
+state_reg.init_tx_state 0 0 0 1 1 
+state_reg.communication_state 0 0 1 0 1 
+state_reg.store_rx_state 0 1 0 0 1 
+state_reg.end_state 1 0 0 0 1 
+
+State Machine - |spi_minimized_delay_top|nios:u0|nios_nios2_gen2_0:nios2_gen2_0|nios_nios2_gen2_0_cpu:cpu|nios_nios2_gen2_0_cpu_nios2_oci:the_nios_nios2_gen2_0_cpu_nios2_oci|nios_nios2_gen2_0_cpu_debug_slave_wrapper:the_nios_nios2_gen2_0_cpu_debug_slave_wrapper|nios_nios2_gen2_0_cpu_debug_slave_tck:the_nios_nios2_gen2_0_cpu_debug_slave_tck|DRsize
+Name DRsize.101 DRsize.100 DRsize.011 DRsize.010 DRsize.001 DRsize.000 
+DRsize.000 0 0 0 0 0 0 
+DRsize.001 0 0 0 0 1 1 
+DRsize.010 0 0 0 1 0 1 
+DRsize.011 0 0 1 0 0 1 
+DRsize.100 0 1 0 0 0 1 
+DRsize.101 1 0 0 0 0 1 

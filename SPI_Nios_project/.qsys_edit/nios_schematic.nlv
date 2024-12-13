@@ -1,0 +1,48 @@
+# # File gsaved with Nlview version 6.3.8  2013-12-19 bk=1.2992 VDI=34 GEI=35
+# 
+preplace inst nios.spi_tx_register_5 -pg 1 -lvl 3 -y 1610
+preplace inst nios.spi_rx_register_0 -pg 1 -lvl 3 -y 1710
+preplace inst nios.onchip_memory2_0 -pg 1 -lvl 3 -y 130
+preplace inst nios.jtag_uart_0 -pg 1 -lvl 3 -y 210
+preplace inst nios -pg 1 -lvl 1 -y 40 -regy -20
+preplace inst nios.spi_rx_register_1 -pg 1 -lvl 3 -y 410
+preplace inst nios.spi_rx_register_2 -pg 1 -lvl 3 -y 710
+preplace inst nios.start_spi_register -pg 1 -lvl 3 -y 610
+preplace inst nios.spi_rx_register_3 -pg 1 -lvl 3 -y 810
+preplace inst nios.nios2_gen2_0.cpu -pg 1
+preplace inst nios.end_spi -pg 1 -lvl 3 -y 310
+preplace inst nios.spi_rx_register_4 -pg 1 -lvl 3 -y 910
+preplace inst nios.delay_spi -pg 1 -lvl 3 -y 30
+preplace inst nios.clk_0 -pg 1 -lvl 1 -y 190
+preplace inst nios.spi_rx_register_5 -pg 1 -lvl 3 -y 1010
+preplace inst nios.spi_tx_register_0 -pg 1 -lvl 3 -y 1110
+preplace inst nios.spi_tx_register_1 -pg 1 -lvl 3 -y 1210
+preplace inst nios.nios2_gen2_0.reset_bridge -pg 1
+preplace inst nios.spi_tx_register_2 -pg 1 -lvl 3 -y 1310
+preplace inst nios.nios2_gen2_0.clock_bridge -pg 1
+preplace inst nios.nios2_gen2_0 -pg 1 -lvl 2 -y 170
+preplace inst nios.spi_tx_register_3 -pg 1 -lvl 3 -y 1410
+preplace inst nios.spi_tx_register_4 -pg 1 -lvl 3 -y 1510
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)spi_tx_register_0.external_connection,(SLAVE)nios.spi_tx_register_external_connection) 1 0 3 NJ 1140 NJ 1140 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.spi_rx_register_3_external_connection,(SLAVE)spi_rx_register_3.external_connection) 1 0 3 NJ 840 NJ 840 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.spi_rx_register_1_external_connection,(SLAVE)spi_rx_register_1.external_connection) 1 0 3 NJ 440 NJ 440 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.spi_tx_register_5_external_connection,(SLAVE)spi_tx_register_5.external_connection) 1 0 3 NJ 1640 NJ 1640 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)delay_spi.external_connection,(SLAVE)nios.delay_spi_external_connection) 1 0 3 NJ 60 NJ 60 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)spi_tx_register_2.external_connection,(SLAVE)nios.spi_tx_register_2_external_connection) 1 0 3 NJ 1340 NJ 1340 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.spi_rx_register_4_external_connection,(SLAVE)spi_rx_register_4.external_connection) 1 0 3 NJ 940 NJ 940 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.clk,(SLAVE)clk_0.clk_in) 1 0 1 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.start_spi_register_external_connection,(SLAVE)start_spi_register.external_connection) 1 0 3 NJ 640 NJ 640 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)spi_tx_register_4.external_connection,(SLAVE)nios.spi_tx_register_4_external_connection) 1 0 3 NJ 1540 NJ 1540 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.spi_rx_register_0_external_connection,(SLAVE)spi_rx_register_0.external_connection) 1 0 3 NJ 1740 NJ 1740 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)spi_rx_register_5.external_connection,(SLAVE)nios.spi_rx_register_5_external_connection) 1 0 3 NJ 1040 NJ 1040 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.end_spi_external_connection,(SLAVE)end_spi.external_connection) 1 0 3 NJ 350 NJ 350 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.reset,(SLAVE)clk_0.clk_in_reset) 1 0 1 NJ
+preplace netloc POINT_TO_POINT<net_container>nios</net_container>(SLAVE)jtag_uart_0.irq,(MASTER)nios2_gen2_0.irq) 1 2 1 N
+preplace netloc INTERCONNECT<net_container>nios</net_container>(MASTER)nios2_gen2_0.instruction_master,(SLAVE)spi_rx_register_2.s1,(SLAVE)onchip_memory2_0.s1,(SLAVE)start_spi_register.s1,(SLAVE)spi_tx_register_4.s1,(SLAVE)spi_tx_register_0.s1,(SLAVE)spi_rx_register_5.s1,(SLAVE)spi_rx_register_3.s1,(SLAVE)end_spi.s1,(SLAVE)delay_spi.s1,(SLAVE)spi_tx_register_2.s1,(SLAVE)nios2_gen2_0.debug_mem_slave,(SLAVE)spi_rx_register_4.s1,(MASTER)nios2_gen2_0.data_master,(SLAVE)spi_rx_register_0.s1,(SLAVE)spi_tx_register_5.s1,(SLAVE)spi_rx_register_1.s1,(SLAVE)jtag_uart_0.avalon_jtag_slave,(SLAVE)spi_tx_register_3.s1,(SLAVE)spi_tx_register_1.s1) 1 1 2 450 330 810
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.spi_rx_register_2_external_connection,(SLAVE)spi_rx_register_2.external_connection) 1 0 3 NJ 740 NJ 740 NJ
+preplace netloc FAN_OUT<net_container>nios</net_container>(SLAVE)spi_rx_register_3.reset,(SLAVE)jtag_uart_0.reset,(SLAVE)spi_tx_register_2.reset,(SLAVE)delay_spi.reset,(SLAVE)spi_rx_register_4.reset,(SLAVE)end_spi.reset,(SLAVE)spi_rx_register_1.reset,(SLAVE)spi_tx_register_0.reset,(SLAVE)spi_tx_register_1.reset,(SLAVE)spi_tx_register_5.reset,(SLAVE)nios2_gen2_0.reset,(SLAVE)spi_rx_register_5.reset,(SLAVE)spi_tx_register_4.reset,(SLAVE)spi_rx_register_2.reset,(SLAVE)onchip_memory2_0.reset1,(MASTER)clk_0.clk_reset,(SLAVE)spi_tx_register_3.reset,(SLAVE)spi_rx_register_0.reset,(SLAVE)start_spi_register.reset) 1 1 2 430 130 850
+preplace netloc FAN_OUT<net_container>nios</net_container>(SLAVE)spi_tx_register_5.clk,(SLAVE)delay_spi.clk,(SLAVE)spi_tx_register_3.clk,(SLAVE)onchip_memory2_0.clk1,(SLAVE)nios2_gen2_0.clk,(SLAVE)jtag_uart_0.clk,(SLAVE)spi_rx_register_3.clk,(SLAVE)spi_tx_register_0.clk,(SLAVE)spi_rx_register_1.clk,(SLAVE)spi_rx_register_5.clk,(MASTER)clk_0.clk,(SLAVE)end_spi.clk,(SLAVE)start_spi_register.clk,(SLAVE)spi_rx_register_4.clk,(SLAVE)spi_tx_register_1.clk,(SLAVE)spi_rx_register_0.clk,(SLAVE)spi_tx_register_4.clk,(SLAVE)spi_rx_register_2.clk,(SLAVE)spi_tx_register_2.clk) 1 1 2 410 310 870
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)spi_tx_register_3.external_connection,(SLAVE)nios.spi_tx_register_3_external_connection) 1 0 3 NJ 1440 NJ 1440 NJ
+preplace netloc EXPORT<net_container>nios</net_container>(SLAVE)nios.spi_tx_register_1_external_connection,(SLAVE)spi_tx_register_1.external_connection) 1 0 3 NJ 1240 NJ 1240 NJ
+levelinfo -pg 1 0 200 1080
+levelinfo -hier nios 210 240 570 920 1070

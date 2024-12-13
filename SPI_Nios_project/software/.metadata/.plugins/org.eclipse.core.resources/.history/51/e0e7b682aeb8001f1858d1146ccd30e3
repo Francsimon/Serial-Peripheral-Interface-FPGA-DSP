@@ -1,0 +1,258 @@
+/*
+ * "Hello World" example.
+ *
+ * This example prints 'Hello from Nios II' to the STDOUT stream. It runs on
+ * the Nios II 'standard', 'full_featured', 'fast', and 'low_cost' example
+ * designs. It runs with or without the MicroC/OS-II RTOS and requires a STDOUT
+ * device in your system's hardware.
+ * The memory footprint of this hosted application is ~69 kbytes by default
+ * using the standard reference design.
+ *
+ * For a reduced footprint version of this template, and an explanation of how
+ * to reduce the memory footprint for a given application, see the
+ * "small_hello_world" template.
+ *
+ */
+
+#include <stdio.h>
+#include <altera_avalon_spi.h>
+#include <altera_avalon_spi_regs.h>
+
+#include "io.h"
+#include "alt_types.h"
+#include "sys/alt_irq.h"
+#include "sys/alt_stdio.h"
+#include "system.h"
+#include <unistd.h>
+#include <string.h>
+
+# include "altera_avalon_timer_regs.h"
+#include <altera_avalon_pio_regs.h>
+
+int value;
+float norm_voltage=10;//  2^1 per togliere i primi 2 bit=0, 5 è il guadagno
+float norm_current=67076096;// 2^15=32768 per togliere i primi 16 bit=0, 184.8 è il guadagno
+int status_spi_a, status_spi_b, status_spi_c;
+int status_vc_a1, status_vc_a2,status_vc_b1, status_vc_b2,status_vc_c1, status_vc_c2;
+float current_norm, voltage_norm;
+
+int voltage;
+int current;
+int mask_voltage=0b00000000000000000011111111111100; //last 4 bits to be filtered
+int mask_current=0b00111111111111000000000000000000;
+
+int switching_signals=0;
+int timer_value;
+int startup_expired=0;
+int protection_register=0b00; // bit 1: overcurrent, bit 0 unbalanced voltages
+int end_control=0;
+int protection_on=0;
+
+int count=0;
+
+int i=0;
+int j=0;
+
+void timer_control_ISR(void *context)
+{
+
+IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 1); // start spi communications
+   do{
+   	   status_spi_a=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+   }
+   while( status_spi_a==0 );// wait end communications
+   //IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0); // start spi communications
+   IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0); // end spi communications
+
+
+   // CHANGE REFERENCE AFTER TOT SECONDS
+   IOWR_ALTERA_AVALON_PIO_DATA(DEBUG1_OUT_BASE, IORD_ALTERA_AVALON_PIO_DATA(DEBUG1_IN_BASE	));//DEBUG currrent
+
+
+   // MEASURENENTS
+//   IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_GRID_A_BASE,0x8E000000); //0b0101010101010101);//
+//   IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_GRID_B_BASE,0x8E000000);
+//   IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_GRID_C_BASE,0x8E000000);
+//
+//   IOWR_ALTERA_AVALON_PIO_DATA(PIO_VC_A1_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_VC_A1_BASE));
+//   IOWR_ALTERA_AVALON_PIO_DATA(PIO_VC_B1_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_VC_B1_BASE));
+//   IOWR_ALTERA_AVALON_PIO_DATA(PIO_VC_C1_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_VC_C1_BASE));
+//   IOWR_ALTERA_AVALON_PIO_DATA(PIO_VC_A2_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_VC_A2_BASE));
+//   IOWR_ALTERA_AVALON_PIO_DATA(PIO_VC_B2_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_VC_B2_BASE));
+//   IOWR_ALTERA_AVALON_PIO_DATA(PIO_VC_C2_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_VC_C2_BASE));
+//
+//	do { //wait end of transmission
+////		status_spi_a = IORD_ALTERA_AVALON_SPI_STATUS(SPI_GRID_A_BASE);
+////		status_spi_b = IORD_ALTERA_AVALON_SPI_STATUS(SPI_GRID_B_BASE);
+//		status_spi_c = IORD_ALTERA_AVALON_SPI_STATUS(SPI_GRID_C_BASE);
+//	}
+//	while(
+////			(status_spi_a & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ||
+////			(status_spi_b & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ||
+//			(status_spi_c & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0 );
+//
+//    IOWR_ALTERA_AVALON_PIO_DATA(PIO_GRID_A_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_GRID_A_BASE));
+//    IOWR_ALTERA_AVALON_PIO_DATA(PIO_GRID_B_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_GRID_B_BASE));
+//    IOWR_ALTERA_AVALON_PIO_DATA(PIO_GRID_C_BASE, IORD_ALTERA_AVALON_SPI_RXDATA(SPI_GRID_C_BASE));
+
+//   IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 1); // start spi communications
+//   do{
+//	   status_spi_a=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+//   }
+//   while( status_spi_a==0 );// wait end communications
+//   IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0); // start spi communications
+//   IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 1); // start spi communications
+//   do{
+//	   status_spi_a=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+//   }
+//   while( status_spi_a==0 );// wait end communications
+//   IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0); // start spi communications
+
+
+//   IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 1); // start spi communications
+//   do{
+//	   status_spi_a=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+//   }
+//   while( status_spi_a==0 );// wait end communications
+//
+//   IOWR_ALTERA_AVALON_PIO_DATA(DEBUG1_OUT_BASE, IORD_ALTERA_AVALON_PIO_DATA(DEBUG4_IN_BASE	));//DEBUG currrent
+
+
+   IOWR_ALTERA_AVALON_PIO_DATA(START_PLL_BASE, 1); // assert PLL_start_signal when grid voltages are measured
+
+//    IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_VC_A1_BASE,0x0000001); //0b0101010101010101);//
+//    IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_VC_A2_BASE,0x0000001);
+//    IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_VC_B1_BASE,0x0000001);
+//    IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_VC_B2_BASE,0x0000001);
+//    IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_VC_C1_BASE,0x0000001);
+//    IOWR_ALTERA_AVALON_SPI_TXDATA(SPI_VC_C2_BASE,0x0000001);
+//    // MEASURENENTS
+
+//    do {
+    //	status_vc_a1 = IORD_ALTERA_AVALON_SPI_STATUS(SPI_VC_A1_BASE);
+    //	status_vc_a2 = IORD_ALTERA_AVALON_SPI_STATUS(SPI_VC_A2_BASE);
+    //	status_vc_b1 = IORD_ALTERA_AVALON_SPI_STATUS(SPI_VC_B1_BASE);
+    //	status_vc_b2 = IORD_ALTERA_AVALON_SPI_STATUS(SPI_VC_B2_BASE);
+    //	status_vc_c1 = IORD_ALTERA_AVALON_SPI_STATUS(SPI_VC_C1_BASE);
+//    	status_vc_c2 = IORD_ALTERA_AVALON_SPI_STATUS(SPI_VC_C2_BASE);
+//    }
+//    while(
+    //		(status_vc_a1 & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ||
+    //		(status_vc_a2 & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ||
+    //		(status_vc_b1 & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ||
+    //		(status_vc_b2 & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ||
+    //		(status_vc_c1 & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ||
+//    		(status_vc_c2 & ALTERA_AVALON_SPI_STATUS_TMT_MSK)==0  ) ;
+
+//    IOWR_ALTERA_AVALON_PIO_DATA(PIO_VC_C2_BASE, 0b00000000001111111111111111111110);
+
+
+
+//    while(j<0) {
+//    	j=j+1;
+//    }
+
+
+//    IOWR_ALTERA_AVALON_PIO_DATA(DEBUG1_OUT_BASE, IORD_ALTERA_AVALON_PIO_DATA(PIO_VC_B2_BASE)>>16);//DEBUG voltage
+
+
+IOWR_ALTERA_AVALON_PIO_DATA(START_CONTROL_BASE, 1); // assert control_start_signal when vc are measured
+// here there are several microseconds to wait: can be used in doing something!
+
+/* timer per aspettare il PLL ... rimpiazzato con HW counter
+IOWR_ALTERA_AVALON_TIMER_SNAPH(TIMER_DELAY_BASE, 0);
+timer_value=IORD_ALTERA_AVALON_TIMER_SNAPH(TIMER_DELAY_BASE); // set START, CONT, ITO = 1, 1, 1
+
+if (timer_value<57907){//<57907) { // wait 10s for PLL synchronization >723
+	startup_expired=1;
+//	IOWR_ALTERA_AVALON_PIO_DATA(STARTUP_REGISTER_BASE, 1);
+	IOWR_ALTERA_AVALON_TIMER_CONTROL(TIMER_DELAY_BASE, 0x0008); // set STOP = 1
+} // if 10s expired
+*/
+switching_signals=0;
+do{
+	end_control=IORD_ALTERA_AVALON_PIO_DATA(END_CONTROL_BASE);
+}
+while( end_control==0 );// wait until control is computed
+
+//switching_signals = 0b101010101010101010101010;
+
+// MECCANISMO DI PROTEZIONE SE CORRENTI E TENSIONI FUORI RANGE
+/*
+protection_register=IORD_ALTERA_AVALON_PIO_DATA(PROTECTION_REGISTER_BASE); // verify currents or voltages out of range
+if (protection_register!=0){// && startup_expired==1){ // se i bit di protezione non sono a zero, entra in protezione e non ne esci
+//	switching_signals = IORD_ALTERA_AVALON_SPI_STATUS(OUTPUT_IB_BASE);
+	protection_on=1;
+//	printf("Time expired!\n");
+}// store control inputs
+if (protection_on==0){ // se la protezione non è innescata, scrivi il controllo, altrimenti scrivi 0
+	switching_signals = IORD_ALTERA_AVALON_PIO_DATA(OUTPUT_IB_BASE);
+};// POSSIBILITÀ DI SCRIVERE DIRETTAMENTE IN HW UN BIT CHE NON TORNA A ZERO
+
+*/
+
+switching_signals = IORD_ALTERA_AVALON_PIO_DATA(OUTPUT_IB_BASE);
+
+//switching_signals=0; // DEBUG SENZA CONTROLLO
+
+
+// VERIFICARE CHE IL SEGNALE ARRIVI SEMPRE ALLA FREQUENZA DESIDERATA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TEST SWITCHING DEL SINGOLO PONTE H
+/*
+count=count+1;
+if (count>2){count=1;}
+
+if (count==1){
+	switching_signals = 0b101000000000000000000000;
+}
+if(count==2){
+	switching_signals = 0b100100000000000000000000;
+}
+*/
+//IOWR_ALTERA_AVALON_PIO_DATA(DEBUG2_OUT_BASE, 0);//DEBUG currrent
+//IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 1); // start spi communications
+//do{
+//	   status_spi_a=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+//}
+//while( status_spi_a==0 );// wait end communications
+//IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0); // start spi communications
+//
+//IOWR_ALTERA_AVALON_PIO_DATA(DEBUG2_OUT_BASE, 1);//DEBUG currrent
+
+
+
+
+IOWR_ALTERA_AVALON_PIO_DATA(START_PLL_BASE, 0); // restore PLL_start_signal to 0
+IOWR_ALTERA_AVALON_PIO_DATA(START_CONTROL_BASE, 0); // restore control_start_signal to 0
+
+}
+
+
+int main()
+{
+	printf("Hello from Nios II!\n");
+
+
+
+// SETTINGS
+	IOWR_ALTERA_AVALON_PIO_DATA(DELAY_SPI_BASE, 60);// SPI delay between cs assertion and 1th spi clk pulse
+
+
+
+	// SPI COMMUNICATION
+	IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0b111111); // start spi communications
+	   do{
+	   	   status_spi_a=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+	   }
+	   while( status_spi_a==0 );// wait end communications
+
+	   IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0); // end spi communications
+
+
+
+	   while(1){
+
+
+	}
+  return 0;
+}

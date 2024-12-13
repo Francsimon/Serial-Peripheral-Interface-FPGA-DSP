@@ -1,0 +1,234 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
+entity spi_master_module is
+generic(
+			CLK_DIV : integer:=3; -- the clk frequency will be divided by 2*CLK_DIV
+			cpol :  std_logic:='0'; --clk polarity
+			cpha : std_logic:='0';  --clk phase
+			WORD : integer:=32 --word length
+);
+port (clk : in std_logic;
+		reset : in std_logic;
+
+		start: in std_logic;
+		data_tx_in : in std_logic_vector(WORD-1 downto 0);
+		data_rx_out : out std_logic_vector(WORD-1 downto 0); 
+		DELAY_CONSTANT : in integer:=12;
+
+		spi_miso_in: in std_logic;
+		spi_mosi_out: out std_logic;
+		spi_cs_out: out std_logic;
+		spi_clk_out: out  std_logic;
+
+		end_signal: out std_logic
+		
+);
+end spi_master_module;
+
+
+architecture arch1 of spi_master_module is
+
+type state_type is (idle, init_tx_state, communication_state, store_rx_state, end_state);
+signal state_reg, state_next : state_type;
+
+signal tx_buffer_reg, tx_buffer_next, rx_buffer_reg, rx_buffer_next : std_logic_vector(WORD-1 downto 0);
+
+signal delay_counter_reg, delay_counter_next, div_counter_reg, div_counter_next, bits_counter_reg, bits_counter_next : integer;
+
+signal SHIFT : integer;
+
+signal spi_cs_reg, spi_cs_next, start_delay, spi_clk_reg, spi_clk_next, div_clk_pulse, start_div_counter,
+			delay_counter_end, delay_counter_shift_end, start_sclk, start_tx,   load_tx_buffer: std_logic;
+
+signal div_counter_2_reg, div_counter_2_next : integer;
+signal div_clk_2_pulse , start_div_counter_shift: std_logic;
+
+signal debug_out : std_logic_vector(WORD-1 downto 0);
+signal rx_data_reg, rx_data_next : std_logic_vector(WORD-1 downto 0);
+			
+begin
+
+SHIFT<= -CLK_DIV when cpha ='0' else
+		  0;
+	
+
+reg_process: process(clk,reset)
+begin
+	if reset='1' then	
+		state_reg<=idle;
+		tx_buffer_reg<=(others=>'0');
+		rx_buffer_reg<=(others=>'0');
+		delay_counter_reg<=0;
+		div_counter_reg<=0;
+		spi_cs_reg<='0';
+		spi_clk_reg<=cpol;
+--		tx_clk_reg<='0';
+		bits_counter_reg<=0;
+		div_counter_2_reg<=0;
+		rx_data_reg<=(others=>'0');
+	elsif clk'event and clk='1' then
+		state_reg<=state_next;
+		tx_buffer_reg<=tx_buffer_next;
+		rx_buffer_reg<=rx_buffer_next;
+		delay_counter_reg<=delay_counter_next;
+		div_counter_reg<=div_counter_next;
+		spi_cs_reg<=spi_cs_next;
+		spi_clk_reg<=spi_clk_next;
+--		tx_clk_reg<=tx_clk_next;
+		bits_counter_reg<=bits_counter_next;
+		div_counter_2_reg<=div_counter_2_next;
+		rx_data_reg<=rx_data_next;
+	end if;
+end process;
+
+
+next_logic_process: process(start, state_reg, bits_counter_reg, spi_cs_reg, rx_buffer_reg, rx_data_reg)
+begin
+end_signal<='0';
+load_tx_buffer<='0';
+spi_cs_next<='0';
+start_delay<='0';
+rx_data_next<=rx_data_reg;
+
+	case state_reg is
+		when idle =>
+			if start='1' then
+				state_next<=init_tx_state;
+			else
+				state_next<=idle;
+			end if;
+			
+		when init_tx_state =>
+--			spi_cs_next<='0';
+
+			load_tx_buffer<='1';
+--			tx_buffer_next<=data_tx_in;
+			state_next<=communication_state;
+		
+		when communication_state =>			
+			spi_cs_next<='1';
+			start_delay<='1';
+		
+			if bits_counter_reg<WORD*2 then	
+				state_next<=communication_state;
+			else
+				state_next<=store_rx_state;
+			end if;
+			
+		when store_rx_state =>
+--			spi_cs_next<='0';
+
+			rx_data_next<=rx_buffer_reg;
+			
+			state_next<=end_state;
+			
+		when end_state =>	
+			end_signal<='1';
+			if start='1' then
+				state_next<=end_state;
+			else
+				state_next<=idle;
+			end if;
+	end case;
+end process;
+
+----clk divider pulse generator
+start_div_counter<=delay_counter_end;-- to spi_clk
+start_div_counter_shift<=delay_counter_shift_end; -- to tx & rx 
+process(div_counter_reg, start_div_counter, div_counter_2_reg, start_div_counter_shift)
+begin
+	div_counter_next<=0;
+	div_clk_pulse<='0';
+	div_counter_2_next<=0;
+	div_clk_2_pulse<='0';
+
+	if start_div_counter='1' then
+		div_counter_next<=div_counter_reg+1;
+		if div_counter_reg=CLK_DIV-1 then
+			div_counter_next<=0;
+		end if;
+	
+		if div_counter_reg=0 then	
+			div_clk_pulse<='1';
+		end if;
+	end if;
+	if start_div_counter_shift='1' then
+		div_counter_2_next<=div_counter_2_reg+1;
+		if div_counter_2_reg=CLK_DIV*2-1 then
+			div_counter_2_next<=0;
+		end if;
+		if div_counter_2_reg=0 then
+			div_clk_2_pulse<='1';
+		end if;
+	end if;	
+end process;
+
+---- delay counter 
+process(start_delay, delay_counter_reg, SHIFT, DELAY_CONSTANT)
+begin
+	delay_counter_next<=0;
+	delay_counter_end<='0';
+	delay_counter_shift_end<='0';
+	if start_delay='1' then
+		delay_counter_next<=delay_counter_reg+1;			
+	end if;
+
+	if delay_counter_reg>DELAY_CONSTANT then -- to tx & rx
+		delay_counter_end<='1';
+	end if;
+	if delay_counter_reg>DELAY_CONSTANT+SHIFT then -- to spi_clk
+		delay_counter_shift_end<='1';
+	end if;
+	
+end process;
+
+
+--- sclk buffer -- toggle 
+start_sclk<=delay_counter_shift_end and div_clk_pulse; -- it takes into account the shift option
+process(start_sclk, spi_clk_reg, bits_counter_reg, start_delay)
+begin
+	spi_clk_next<=spi_clk_reg;
+	bits_counter_next<=0;
+	
+	if start_delay='1' then
+		bits_counter_next<=bits_counter_reg;
+		if start_sclk='1' then
+			spi_clk_next<= not spi_clk_reg;
+			bits_counter_next<=bits_counter_reg+1;
+		end if;
+	end if;
+end process;
+
+-- tx & rx buffer
+start_tx<=delay_counter_end and div_clk_2_pulse;
+process(start_tx, tx_buffer_reg,  rx_buffer_reg, load_tx_buffer, data_tx_in,  spi_miso_in)
+begin
+
+--	tx_clk_next<=tx_clk_reg;
+	rx_buffer_next<=rx_buffer_reg;
+	tx_buffer_next<=tx_buffer_reg;
+	
+--	if start_tx='1' then
+----		tx_clk_next<=not tx_clk_reg;	
+--	end if;
+
+	if load_tx_buffer='1' then
+		tx_buffer_next<=data_tx_in;
+	elsif start_tx='1' then
+			tx_buffer_next<=tx_buffer_reg(tx_buffer_reg'high-1 downto 0) & '0'; --I erase the buffer at the end
+			rx_buffer_next<=rx_buffer_reg(rx_buffer_reg'high-1 downto 0) & spi_miso_in; -- I use two buffer register (tx and rx), even if the standard is usign the same register for tx and rx
+	end if;
+		
+		
+end process;
+spi_mosi_out<=tx_buffer_reg(tx_buffer_reg'high); -- not considered the standard 'Z'
+
+
+data_rx_out<=rx_data_next;
+
+spi_cs_out<=spi_cs_reg;
+spi_clk_out<=spi_clk_reg;
+
+end arch1;

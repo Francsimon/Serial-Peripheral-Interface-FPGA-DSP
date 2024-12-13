@@ -1,0 +1,113 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "spi_0_MOSI",
+					"strict" : false
+				},
+				{
+					"name" : "spi_0_SCLK",
+					"strict" : false
+				},
+				{
+					"name" : "spi_0_CS",
+					"strict" : false
+				},
+				{
+					"name" : "spi_1_MOSI",
+					"strict" : false
+				},
+				{
+					"name" : "spi_1_SCLK",
+					"strict" : false
+				},
+				{
+					"name" : "spi_1_CS",
+					"strict" : false
+				},
+				{
+					"name" : "spi_2_MOSI",
+					"strict" : false
+				},
+				{
+					"name" : "spi_2_SCLK",
+					"strict" : false
+				},
+				{
+					"name" : "spi_2_CS",
+					"strict" : false
+				},
+				{
+					"name" : "spi_3_MOSI",
+					"strict" : false
+				},
+				{
+					"name" : "spi_3_SCLK",
+					"strict" : false
+				},
+				{
+					"name" : "spi_3_CS",
+					"strict" : false
+				},
+				{
+					"name" : "spi_4_MOSI",
+					"strict" : false
+				},
+				{
+					"name" : "spi_4_SCLK",
+					"strict" : false
+				},
+				{
+					"name" : "spi_4_CS",
+					"strict" : false
+				},
+				{
+					"name" : "spi_5_MOSI",
+					"strict" : false
+				},
+				{
+					"name" : "spi_5_SCLK",
+					"strict" : false
+				},
+				{
+					"name" : "spi_5_CS",
+					"strict" : false
+				},
+				{
+					"name" : "clk",
+					"strict" : false
+				},
+				{
+					"name" : "reset_n",
+					"strict" : false
+				},
+				{
+					"name" : "spi_5_MISO",
+					"strict" : false
+				},
+				{
+					"name" : "spi_3_MISO",
+					"strict" : false
+				},
+				{
+					"name" : "spi_4_MISO",
+					"strict" : false
+				},
+				{
+					"name" : "spi_1_MISO",
+					"strict" : false
+				},
+				{
+					"name" : "spi_2_MISO",
+					"strict" : false
+				},
+				{
+					"name" : "spi_0_MISO",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

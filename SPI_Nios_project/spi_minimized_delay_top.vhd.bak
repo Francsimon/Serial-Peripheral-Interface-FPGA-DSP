@@ -1,0 +1,2455 @@
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+use IEEE.std_logic_unsigned.all;
+use ieee.fixed_pkg.all;
+use work.type_const_pkg.all ; 
+--use work.test_HDL_costs_cap_pkg.all;
+--use work.currents_predictions_pkg.all;
+--use work.alphabeta2abc_pkg.all;
+--use work.PI_ialphabeta_ref_pkg.all;
+
+entity spi_minimized_delay_top is	
+port( clk, reset_n: in std_logic;
+		spi_grid_MISO_a: in std_logic; --AC24
+		spi_grid_MOSI_a: out std_logic; --AD26
+		spi_grid_SCK_a: out std_logic; --AF28
+		spi_grid_SS_n_a: out std_logic; --AF27
+		
+		spi_grid_MISO_b: in std_logic; --AC24
+		spi_grid_MOSI_b: out std_logic; --AD26
+		spi_grid_SCK_b: out std_logic; --AF28
+		spi_grid_SS_n_b: out std_logic; --AF27
+		
+		spi_grid_MISO_c: in std_logic; --AC24
+		spi_grid_MOSI_c: out std_logic; --AD26
+		spi_grid_SCK_c: out std_logic; --AF28
+		spi_grid_SS_n_c: out std_logic; --AF27
+
+		---SPI PHASE U
+		spi_0_MISO : in std_logic;
+		spi_0_MOSI : out std_logic;
+		spi_0_SCLK : out std_logic;                
+		spi_0_SS_n : out std_logic;
+
+		spi_1_MISO : in std_logic;
+		spi_1_MOSI : out std_logic;
+		spi_1_SCLK : out std_logic;                
+		spi_1_SS_n : out std_logic;
+			
+		---SPI PHASE V
+		spi_16_MISO : in std_logic;
+		spi_16_MOSI : out std_logic;
+		spi_16_SCLK : out std_logic;                
+		spi_16_SS_n : out std_logic;
+
+		spi_17_MISO : in std_logic;
+		spi_17_MOSI : out std_logic;
+		spi_17_SCLK : out std_logic;                
+		spi_17_SS_n : out std_logic;
+		
+		---SPI PHASE W
+		spi_32_MISO : in std_logic;
+		spi_32_MOSI : out std_logic;
+		spi_32_SCLK : out std_logic;                
+		spi_32_SS_n : out std_logic;
+
+		spi_34_MISO : in std_logic;
+		spi_34_MOSI : out std_logic;
+		spi_34_SCLK : out std_logic;                
+		spi_34_SS_n : out std_logic;
+
+--		start_control_nios: in std_logic;
+--		start_pll_nios: in std_logic;		
+--		grid_rx_a: in std_logic_vector(31 downto 0);
+--		grid_rx_b: in std_logic_vector(31 downto 0);
+--		grid_rx_c: in std_logic_vector(31 downto 0);
+--		i_current_grid_a : in std_logic_vector(11 downto 0);
+--		i_voltage_grid_a : in std_logic_vector(11 downto 0);
+--		i_current_grid_b : in std_logic_vector(11 downto 0);
+--		i_voltage_grid_b : in std_logic_vector(11 downto 0);
+--		i_current_grid_c : in std_logic_vector(11 downto 0);
+--		i_voltage_grid_c : in std_logic_vector(11 downto 0);
+		
+--		iq_ref: in std_logic_vector(7 downto 0);
+--		pio_vc_a1: in std_logic_vector(15 downto 0);
+--		pio_vc_a2: in std_logic_vector(15 downto 0);
+--		pio_vc_a3: in std_logic_vector(15 downto 0);
+--		pio_vc_a4: in std_logic_vector(15 downto 0);
+--		pio_vc_b1: in std_logic_vector(15 downto 0);
+--		pio_vc_b2: in std_logic_vector(15 downto 0);
+--		pio_vc_b3: in std_logic_vector(15 downto 0);
+--		pio_vc_b4: in std_logic_vector(15 downto 0);
+--		pio_vc_c1: in std_logic_vector(15 downto 0);
+--		pio_vc_c2: in std_logic_vector(15 downto 0);
+--		pio_vc_c3: in std_logic_vector(15 downto 0);
+--		pio_vc_c4: in std_logic_vector(15 downto 0);
+
+		
+		--clk_out: out std_logic; --debugging: clk in output
+		start_control_signal_out : out std_logic; --debugging start pll
+--	   timer_control_pulse: out std_logic; --debugging timer nios
+--		s_i_out : out vector_of_std_logic_vector2(0 TO 11)
+
+		--- PHASE U
+		P1_1H_U : out std_logic;
+		P1_1L_U : out std_logic;
+		P1_2L_U : out std_logic;
+		P1_2H_U : out std_logic;
+		P2_1H_U : out std_logic;
+		P2_1L_U : out std_logic;
+		P2_2L_U : out std_logic;
+		P2_2H_U : out std_logic;
+		--- PHASE V
+		P1_1H_V : out std_logic;
+		P1_1L_V : out std_logic;
+		P1_2L_V : out std_logic;
+		P1_2H_V : out std_logic;
+		P2_1H_V : out std_logic;
+		P2_1L_V : out std_logic;
+		P2_2L_V : out std_logic;
+		P2_2H_V : out std_logic;
+		--- PHASE W
+		P1_1H_W : out std_logic;
+		P1_1L_W : out std_logic;
+		P1_2L_W : out std_logic;
+		P1_2H_W : out std_logic;
+		P3_1H_W : out std_logic;
+		P3_1L_W : out std_logic;
+		P3_2L_W : out std_logic;
+		P3_2H_W : out std_logic;
+		
+--		wt_out : out std_logic_vector(31 downto 0);
+--		id_ref_out: out std_logic_vector(31 downto 0);
+--		s_alpha_opt_out: out std_logic_vector(31 downto 0);
+--		s_beta_opt_out: out std_logic_vector(31 downto 0);
+--		
+--		i_alpha_ref_out : out std_logic_vector(31 downto 0);	
+--		i_beta_ref_out : out std_logic_vector(31 downto 0);
+--		i_alpha_out : out std_logic_vector(31 downto 0);
+--		i_beta_out : out std_logic_vector(31 downto 0);
+--		s_alpha_k_1_out : out std_logic_vector(31 downto 0);
+--		s_beta_k_1_out : out std_logic_vector(31 downto 0);
+--		vg_alpha_out : out std_logic_vector(31 downto 0);
+--		vg_beta_out : out std_logic_vector(31 downto 0);
+		
+--i_alpha_ref_in: in std_logic_vector(31 downto 0);
+--i_beta_ref_in : in std_logic_vector(31 downto 0);
+--i_alpha_in : in std_logic_vector(31 downto 0);
+--i_beta_in: in std_logic_vector(31 downto 0);
+--s_alpha_k_1_in: in std_logic_vector(31 downto 0);
+--s_beta_k_1_in: in std_logic_vector(31 downto 0);
+--vg_alpha_in : in std_logic_vector(31 downto 0);
+--vg_beta_in : in std_logic_vector(31 downto 0);
+--		cost_1a, cost_2a, cost_3a, cost_4a: out std_logic_vector(31 downto 0);
+--		indeces_1a, indeces_2a, indeces_3a, indeces_4a: out std_logic_vector(31 downto 0);
+--			
+--		ia_pred_in,ib_pred_in,ic_pred_in : in std_logic_vector(31 downto 0);
+--		S_k_1_1a,S_k_1_2a,S_k_1_3a,S_k_1_4a,S_k_1_1b,S_k_1_2b,S_k_1_3b,S_k_1_4b,S_k_1_1c,S_k_1_2c,S_k_1_3c,S_k_1_4c: in std_logic_vector(1 downto 0);
+--	
+--
+--		vc_a1_ib_out: out std_logic_vector(31 downto 0);
+--		vc_a2_ib_out: out std_logic_vector(31 downto 0);
+--		vc_a3_ib_out: out std_logic_vector(31 downto 0);
+--		vc_a4_ib_out: out std_logic_vector(31 downto 0);
+--		S_a_ib_out : out std_logic_vector(31 downto 0);
+--		i_a_ib_out : out std_logic_vector(31 downto 0);
+--		i_pred_a_ib_out : out std_logic_vector(31 downto 0);
+--		S_k_1_a1_ib_out : out std_logic_vector(31 downto 0);
+--		S_k_1_a2_ib_out : out std_logic_vector(31 downto 0);
+--		S_k_1_a3_ib_out : out std_logic_vector(31 downto 0);
+--		S_k_1_a4_ib_out : out std_logic_vector(31 downto 0);
+--
+--		i_wt_pll_in : in std_logic_vector(31 downto 0);
+		overcurrent_out : out std_logic;
+		unbalance_v_out : out std_logic;
+
+		spi_clk_out_debug_out: out std_logic;
+		spi_cs_out_debug_out: out std_logic;
+		spi_mosi_out_debug_out: out std_logic;
+		spi_miso_in_debug_out: out std_logic;
+
+		
+	vc_debug_out : out std_logic_vector(10 downto 0);
+	startup_signal_out : out std_logic;
+	end_signal_out : out std_logic -- end computations v_abc_debug		
+);
+end spi_minimized_delay_top;
+
+
+architecture arch0 of test_spi_control_top is
+
+  
+  
+type state_type is (idle, norm_voltages_load_m_op, norm_currents_load_m_op, norm_currents_load_m_res, norm_currents_store, norm_voltages_load_m_res,
+							alpha_beta_transform_i,  alpha_beta_transform_v_store, compute_pll, compute_idq_ref, compute_current_control,
+							compute_individual_balancing, compute_cluster_balancing, control_store, alpha_beta_transform_i_ref, alpha_beta_transform_i_ref_store,
+							norm_capacitors_load_m_op1, norm_capacitors_load_m_res1,norm_capacitors_load_m_op2, norm_capacitors_load_m_res2,
+							norm_capacitors_load_m_op3,norm_grid_voltages_store, -- alpha_beta_transform_i_store, norm_capacitors_load_m_res3,norm_capacitors_load_m_op4, norm_capacitors_load_m_res4,
+							--cluster_balancing_store,--norm_capacitors_store,
+							end_state, norm_currents_load_a_op, norm_currents_load_a_res,
+							norm_currents_load_m_op_test,norm_currents_load_m_res_test);
+signal state_reg, state_next : state_type;
+
+signal grid_rx_a, grid_rx_b, grid_rx_c : std_logic_vector(31 downto 0); 
+signal i_voltage_grid_a, i_voltage_grid_b, i_voltage_grid_c : std_logic_vector(11 downto 0);
+
+
+signal iq_ref : std_logic_vector(7 downto 0);--, iq_ref
+
+signal start_pll_nios, start_control_nios : std_logic;
+signal i_reg, i_next : integer;
+
+signal mult_in_a_reg, mult_in_a_next, mult_in_b_reg, mult_in_b_next, mult_out_reg, mult_out_next, mult_out_signal : sfixed_array_c(0 to 2);
+signal acc_in_a_reg, acc_in_a_next, acc_in_b_reg, acc_in_b_next, acc_out_reg, acc_out_next, acc_out_signal : sfixed_array_c(0 to 2);
+signal load_mult, load_acc: std_logic_vector(0 to 2);
+
+signal mult_in_a_reg_mv, mult_in_a_next_mv, mult_in_b_reg_mv, mult_in_b_next_mv, mult_out_reg_mv, mult_out_next_mv : sfixed_array_c(0 to 2);
+signal acc_in_a_reg_mv, acc_in_a_next_mv, acc_in_b_reg_mv, acc_in_b_next_mv, acc_out_reg_mv, acc_out_next_mv : sfixed_array_c(0 to 2);
+signal load_mult_mv, load_acc_mv: std_logic_vector(0 to 2);
+
+signal mult_in_a_reg_pi, mult_in_a_next_pi, mult_in_b_reg_pi, mult_in_b_next_pi, mult_out_reg_pi, mult_out_next_pi : sfixed_array_c(0 to 2);
+signal acc_in_a_reg_pi, acc_in_a_next_pi, acc_in_b_reg_pi, acc_in_b_next_pi, acc_out_reg_pi, acc_out_next_pi : sfixed_array_c(0 to 2);
+signal load_mult_pi, load_acc_pi: std_logic_vector(0 to 2);
+
+signal mult_in_a_reg_pred, mult_in_a_next_pred, mult_in_b_reg_pred, mult_in_b_next_pred, mult_out_reg_pred, mult_out_next_pred : sfixed_array_c(0 to 2);
+signal acc_in_a_reg_pred, acc_in_a_next_pred, acc_in_b_reg_pred, acc_in_b_next_pred, acc_out_reg_pred, acc_out_next_pred : sfixed_array_c(0 to 2);
+signal load_mult_pred, load_acc_pred: std_logic_vector(0 to 2);
+
+signal mult_in_a_reg_lpf, mult_in_a_next_lpf, mult_in_b_reg_lpf, mult_in_b_next_lpf, mult_out_reg_lpf, mult_out_next_lpf : sfixed_array_c(0 to 2);
+signal acc_in_a_reg_lpf, acc_in_a_next_lpf, acc_in_b_reg_lpf, acc_in_b_next_lpf, acc_out_reg_lpf, acc_out_next_lpf : sfixed_array_c(0 to 2);
+signal load_mult_lpf, load_acc_lpf: std_logic_vector(0 to 2);
+
+signal i_ia_sfix, i_ib_sfix, i_ic_sfix,  i_ia_sfix_CT, i_ib_sfix_CT, i_ic_sfix_CT : sfixed(REG_H downto REG_L);
+signal i_va_sfix, i_vb_sfix, i_vc_sfix : sfixed(REG_H downto REG_L);
+signal i_va_norm_reg, i_va_norm_next, i_vb_norm_reg, i_vb_norm_next, i_vc_norm_reg, i_vc_norm_next : sfixed(REG_H downto REG_L);
+signal i_ia_norm_reg, i_ia_norm_next, i_ib_norm_reg, i_ib_norm_next, i_ic_norm_reg, i_ic_norm_next,
+		 i_alpha_reg, i_alpha_next, i_beta_reg, i_beta_next,--, i_gamma_reg, i_gamma_next, , i_gamma_ref_reg, i_gamma_ref_next
+		 i_alpha_ref_reg, i_alpha_ref_next, i_beta_ref_reg, i_beta_ref_next
+		 : sfixed(REG_H downto REG_L);
+		 
+signal end_signal_pll, end_signal_mv, start_pll, start_mv, start_currents_control, end_currents_control, start_pi, end_signal_pi,
+			start_lpf, end_signal_lpf: std_logic;
+
+signal matrix1_in: array_matrix_3_3_C;
+signal vector_in:  array_vector_3_C;
+signal vector_out:  array_vector_3_C;
+
+signal vc_1a,vc_2a,vc_3a,vc_4a,vc_1b,vc_2b,vc_3b,vc_4b,vc_1c,vc_2c,vc_3c,vc_4c : std_logic_vector(31 downto 0);--sfixed(REG_H downto REG_L);
+signal sin_pll_out, cos_pll_out, minus_sin_pll_out, minus_cos_pll_out: sfixed(REG_H downto REG_L);
+signal v_alpha_reg, v_alpha_next, v_beta_reg, v_beta_next : sfixed(REG_H downto REG_L);--, v_gamma_reg, v_gamma_nex
+
+
+signal integrator_error_idq_reg,integrator_error_idq_next, integral_error_idq_signal : std_logic_vector(31 downto 0);
+
+signal i_alphabeta_ref: std_logic_vector(31 downto 0);
+			  
+signal s_alpha_opt, s_beta_opt : sfixed(REG_H downto REG_L);
+
+signal s_i_reg, s_i_next, s_i_signal : sfixed2_array(0 to 3*N-1);
+
+--signal en_i_pred, en_individual_balancing : std_logic; -- en_pi,en_cluster_balancing, 
+
+signal i_alpha_ref,i_beta_ref : std_logic_vector(31 downto 0);--sfixed(REG_H downto REG_L);
+
+signal v_ci : vector_of_std_logic_vector32(0 TO 11);  -- sfix32_En24 [12]
+
+--signal ia_pred: vector_of_std_logic_vector32(0 TO 2);  -- sfix32_En24 [3]
+--signal iabc_pred: vector_of_std_logic_vector32(0 TO 2);  -- sfix32_En24 [3]
+
+signal pio_vc_a1,pio_vc_a2,pio_vc_b1,pio_vc_b2,pio_vc_c1,pio_vc_c2 : std_logic_vector(14 downto 0); --pio_vc_a3,pio_vc_a4, ,pio_vc_b3,pio_vc_b4,pio_vc_c3,pio_vc_c4
+signal i_current_grid_a, i_current_grid_b, i_current_grid_c : std_logic_vector(14 downto 0);
+signal i_current_grid_a_CT, i_current_grid_b_CT, i_current_grid_c_CT : std_logic_vector(11 downto 0);
+
+--signal vc_a1,vc_a2,vc_a3,vc_a4,vc_b1,vc_b2,vc_b3,vc_b4,vc_c1,vc_c2,vc_c3,vc_c4 : std_logic_vector(31 downto 0);--sfixed(REG_H downto REG_L);
+signal vc_i_sfix : sfixed_array_c(0 to 3*N-1);
+signal id_ref, iq_ref_sfix : sfixed(REG_H downto REG_L);
+
+--signal i_alpha_ref_in_sfixed, i_beta_ref_in_sfixed: sfixed(REG_H downto REG_L);
+--signal iq_ref_slv: std_logic_vector(31 downto 0);
+--signal  Salphabeta : vector_of_std_logic_vector32(0 TO 1);  
+--signal Sa : vector_of_std_logic_vector4(0 TO 2);  -- sfix4 [3]
+--signal ia : vector_of_std_logic_vector32(0 TO 2);  -- sfix32_En24 [3]
+--signal Sa_slv,Sb_slv,Sc_slv : std_logic_vector(3 downto 0);
+
+signal Sa_cb_reg, Sa_cb_next,Sb_cb_reg, Sb_cb_next,Sc_cb_reg, Sc_cb_next : sfixed(SABC_H downto SABC_L);
+
+signal Sa_slv : vector_of_std_logic_vector4(0 to 2);
+signal ia_slv: vector_of_std_logic_vector32(0 to 2);
+signal Sa_opt_slv,Sb_opt_slv,Sc_opt_slv: std_logic_vector(3 downto 0);
+
+signal S_k_sfix: sfixed2_array(0 to 3*N-1);
+signal start_ib, end_signal_ib : std_logic;
+
+signal S_abc_ib : sfixed_array_s(0 to 2);
+signal i_abc_ib : sfixed_array_c(0 to 2);
+--signal i_pred_abc_ib : sfixed_array_c(0 to 2);
+
+signal vc_1a_sfix,vc_2a_sfix,vc_3a_sfix,vc_4a_sfix, vc_1b_sfix,vc_2b_sfix,vc_3b_sfix,vc_4b_sfix, vc_1c_sfix,vc_2c_sfix,vc_3c_sfix,vc_4c_sfix: sfixed(REG_H downto REG_L);
+--signal vc_1a_reg, vc_1a_next, vc_2a_reg, vc_2a_next, vc_3a_reg, vc_3a_next, vc_4a_reg, vc_4a_next, 
+--		 vc_1b_reg, vc_1b_next, vc_2b_reg, vc_2b_next, vc_3b_reg, vc_3b_next, vc_4b_reg, vc_4b_next, 
+--		 vc_1c_reg, vc_1c_next, vc_2c_reg, vc_2c_next, vc_3c_reg, vc_3c_next, vc_4c_reg, vc_4c_next : sfixed(REG_H downto REG_L);
+		 
+signal vc_ip_reg, vc_ip_next : sfixed_array_c(0 to 3*N-1);
+
+signal iabc_pred : sfixed_array_c(0 to 2);
+signal start_pred, end_signal_pred : std_logic;
+
+signal S_out_a: slv4_array(0 to N-1);
+signal S_out_b: slv4_array(0 to N-1);
+signal S_out_c: slv4_array(0 to N-1);
+
+signal i_wt_pll, vdc_out : sfixed(REG_H downto REG_L);
+
+signal switching_register : std_logic_vector(12*N-1 downto 0);
+signal switching_db_out : std_logic_vector(12*N-1 downto 0);
+	
+signal iabc, vg_abc : sfixed_array_c(0 to 2);
+signal sabc : sfixed_array_s(0 to 2);
+
+signal s_alpha_opt_k_reg, s_alpha_opt_k_next, s_beta_opt_k_reg, s_beta_opt_k_next : sfixed(REG_H downto REG_L);
+
+--signal indeces_a_out : integer_array(0 to N-1); -- TEST IB A
+--signal costs_a_out : sfixed_array_c(0 to N-1);  -- TEST IB A
+
+signal start_cb, end_signal_cb : std_logic;
+signal vc_a_out,vc_b_out,vc_c_out: sfixed(REG_H downto REG_L);
+signal s_abc_opt_reg, s_abc_opt_next, vc_abc_in : sfixed_array_c(0 to 2);
+signal Sa_cb, Sb_cb, Sc_cb : sfixed(REG_H downto REG_L);
+signal output_ib : std_logic_vector(12*N-1 downto 0);
+
+signal overcurrent, unbalance_v : std_logic;
+signal protection_register : std_logic_vector(1 downto 0);
+
+signal end_signal, rst, startup_signal, end_period_pll : std_logic;
+signal period_to_wait_pll : std_logic_vector(31 downto 0);
+			
+signal debug1_slv, debug2_slv, debug3_slv, debug4_slv, debug5_slv, debug6_slv, debug7_slv, debug8_slv, debug9_slv, debug10_slv,
+			debug1_out, debug2_out : std_logic_vector(15 downto 0);
+
+signal pio_vc_i_a1,pio_vc_i_a2,pio_vc_i_b1,pio_vc_i_b2,pio_vc_i_c1,pio_vc_i_c2 : std_logic_vector(31 downto 0); --pio_vc_a3,pio_vc_a4, ,pio_vc_b3,pio_vc_b4,pio_vc_c3,pio_vc_c4
+
+signal signal_filtered  : sfixed_array_c(0 to 2);
+
+signal spi_grid_MOSI_abc, spi_grid_SCK_abc, spi_grid_SS_n_abc : std_logic;
+
+type spi_bits_array_type is array(integer range <>) of std_logic;
+signal spi_grid_miso_in_array, spi_grid_mosi_out_array, spi_grid_clk_out_array, spi_grid_cs_out_array, end_signal_spi_grid_array : spi_bits_array_type(0 to 2);
+signal spi_dsp_miso_in_array, spi_dsp_mosi_out_array, spi_dsp_clk_out_array, spi_dsp_cs_out_array, end_signal_spi_dsp_array : spi_bits_array_type(0 to 3*N-1);
+signal spi_dsp_start_array: spi_bits_array_type(0 to 3*N-1);
+signal dsp_start0,dsp_start1,dsp_start2 : std_logic;
+signal counter_start_dsp_reg, counter_start_dsp_next : integer;
+
+type spi32_rx_array_type is array(0 to 2) of std_logic_vector(31 downto 0);
+signal data_grid_rx_array : spi32_rx_array_type;
+
+type spi16_rx_array_type is array(0 to 3*N-1) of std_logic_vector(15 downto 0);
+signal data_dsp_rx_array : spi16_rx_array_type;
+
+signal delay_spi : std_logic_vector(7 downto 0);
+signal delay_spi_int : integer;
+
+signal start_spi, end_signal_spi : std_logic;
+
+signal i_ia_norm_reg_test, i_ia_norm_next_test, i_ib_norm_reg_test, i_ib_norm_next_test, i_ic_norm_reg_test, i_ic_norm_next_test :  sfixed(REG_H downto REG_L);
+
+signal start_spi_dsp, end_signal_spi_dsp_2rx, end_signal_spi_dsp : std_logic;
+signal spi_dsp_tx_data : std_logic_vector(15 downto 0);
+
+type spi_state_type is ( spi_idle, spi_rx_voltage, spi_store_voltage, spi_rx_current, spi_store_current, spi_end_state ); 
+signal spi_state_reg, spi_state_next : spi_state_type;
+
+signal vc_a1_reg, vc_a1_next, vc_a2_reg, vc_a2_next, vc_b1_reg, vc_b1_next, vc_b2_reg, vc_b2_next, vc_c1_reg, vc_c1_next, vc_c2_reg, vc_c2_next, 
+		  current_grid_a_reg, current_grid_a_next, current_grid_b_reg, current_grid_b_next, current_grid_c_reg, current_grid_c_next : std_logic_vector(14 downto 0); 
+
+signal vc_1a_sfix_delay_reg, vc_1a_sfix_delay_next, vc_2a_sfix_delay_reg, vc_2a_sfix_delay_next, vc_1b_sfix_delay_reg, vc_1b_sfix_delay_next, 
+			vc_2b_sfix_delay_reg, vc_2b_sfix_delay_next, vc_1c_sfix_delay_reg, vc_1c_sfix_delay_next, vc_2c_sfix_delay_reg, vc_2c_sfix_delay_next,
+				i_ia_norm_delay_reg, i_ia_norm_delay_next, i_ib_norm_delay_reg, i_ib_norm_delay_next, i_ic_norm_delay_reg, i_ic_norm_delay_next				: sfixed(REG_H downto REG_L);
+
+signal vc_1a_sfix_delay2_reg, vc_1a_sfix_delay2_next, vc_2a_sfix_delay2_reg, vc_2a_sfix_delay2_next, vc_1b_sfix_delay2_reg, vc_1b_sfix_delay2_next, 
+			vc_2b_sfix_delay2_reg, vc_2b_sfix_delay2_next, vc_1c_sfix_delay2_reg, vc_1c_sfix_delay2_next, vc_2c_sfix_delay2_reg, vc_2c_sfix_delay2_next,
+				i_ia_norm_delay2_reg, i_ia_norm_delay2_next, i_ib_norm_delay2_reg, i_ib_norm_delay2_next, i_ic_norm_delay2_reg, i_ic_norm_delay2_next				: sfixed(REG_H downto REG_L);
+				
+signal w_0_cb_nios : std_logic_vector(15 downto 0);
+signal enable_cb : std_logic;
+signal sa_cb_out, sb_cb_out, sc_cb_out, sa_0_out, sb_0_out, sc_0_out : sfixed(REG_H downto REG_L);
+
+signal timer_control_pulse: std_logic; --debugging timer nios
+
+	component nios is
+		port (
+			clk_clk                                        : in  std_logic                     := 'X'; -- clk
+			reset_reset_n                                         : in  std_logic                     := 'X';              -- reset_n
+--			pio_grid_a_external_connection_export          : out std_logic_vector(31 downto 0);        -- export
+--			pio_grid_b_external_connection_export          : out std_logic_vector(31 downto 0);        -- export
+--			pio_grid_c_external_connection_export          : out std_logic_vector(31 downto 0);        -- export
+			pio_iq_ref_external_connection_export          : out std_logic_vector(7 downto 0);         -- export
+--			pio_vc_a1_external_connection_export           : out std_logic_vector(31 downto 0);        -- export
+--			pio_vc_a2_external_connection_export           : out std_logic_vector(31 downto 0);        -- export
+--			pio_vc_b1_external_connection_export           : out std_logic_vector(31 downto 0);        -- export
+--			pio_vc_b2_external_connection_export           : out std_logic_vector(31 downto 0);        -- export
+--			pio_vc_c1_external_connection_export           : out std_logic_vector(31 downto 0);        -- export
+--			pio_vc_c2_external_connection_export           : out std_logic_vector(31 downto 0);        -- export
+--			spi_grid_a_external_MISO                       : in  std_logic                     := 'X'; -- MISO
+--			spi_grid_a_external_MOSI                       : out std_logic;                            -- MOSI
+--			spi_grid_a_external_SCLK                       : out std_logic;                            -- SCLK
+--			spi_grid_a_external_SS_n                       : out std_logic;                            -- SS_n
+--			spi_grid_b_external_MISO                       : in  std_logic                     := 'X'; -- MISO
+--			spi_grid_b_external_MOSI                       : out std_logic;                            -- MOSI
+--			spi_grid_b_external_SCLK                       : out std_logic;                            -- SCLK
+--			spi_grid_b_external_SS_n                       : out std_logic;                            -- SS_n
+--			spi_grid_c_external_MISO                       : in  std_logic                     := 'X'; -- MISO
+--			spi_grid_c_external_MOSI                       : out std_logic;                            -- MOSI
+--			spi_grid_c_external_SCLK                       : out std_logic;                            -- SCLK
+--			spi_grid_c_external_SS_n                       : out std_logic;                            -- SS_n
+--			spi_vc_a1_external_MISO                        : in  std_logic                     := 'X'; -- MISO
+--			spi_vc_a1_external_MOSI                        : out std_logic;                            -- MOSI
+--			spi_vc_a1_external_SCLK                        : out std_logic;                            -- SCLK
+--			spi_vc_a1_external_SS_n                        : out std_logic;                            -- SS_n
+--			spi_vc_a2_external_MISO                        : in  std_logic                     := 'X'; -- MISO
+--			spi_vc_a2_external_MOSI                        : out std_logic;                            -- MOSI
+--			spi_vc_a2_external_SCLK                        : out std_logic;                            -- SCLK
+--			spi_vc_a2_external_SS_n                        : out std_logic;                            -- SS_n
+--			spi_vc_b1_external_MISO                        : in  std_logic                     := 'X'; -- MISO
+--			spi_vc_b1_external_MOSI                        : out std_logic;                            -- MOSI
+--			spi_vc_b1_external_SCLK                        : out std_logic;                            -- SCLK
+--			spi_vc_b1_external_SS_n                        : out std_logic;                            -- SS_n
+--			spi_vc_b2_external_MISO                        : in  std_logic                     := 'X'; -- MISO
+--			spi_vc_b2_external_MOSI                        : out std_logic;                            -- MOSI
+--			spi_vc_b2_external_SCLK                        : out std_logic;                            -- SCLK
+--			spi_vc_b2_external_SS_n                        : out std_logic;                            -- SS_n
+--			spi_vc_c1_external_MISO                        : in  std_logic                     := 'X'; -- MISO
+--			spi_vc_c1_external_MOSI                        : out std_logic;                            -- MOSI
+--			spi_vc_c1_external_SCLK                        : out std_logic;                            -- SCLK
+--			spi_vc_c1_external_SS_n                        : out std_logic;                            -- SS_n
+--			spi_vc_c2_external_MISO                        : in  std_logic                     := 'X'; -- MISO
+--			spi_vc_c2_external_MOSI                        : out std_logic;                            -- MOSI
+--			spi_vc_c2_external_SCLK                        : out std_logic;                            -- SCLK
+--			spi_vc_c2_external_SS_n                        : out std_logic;                            -- SS_n
+			start_control_external_connection_export       : out std_logic;                            -- export
+			start_pll_external_connection_export           : out std_logic;                            -- export
+			timer_control_external_port_export             : out std_logic;                            -- export
+			switching_signals_register_external_connection_export : out std_logic_vector(23 downto 0);         -- export
+			output_ib_external_connection_export                  : in  std_logic_vector(23 downto 0) := (others => 'X') ; -- export
+			protection_register_external_connection_export : in std_logic_vector(1 downto 0);          -- export
+			end_control_external_connection_export                : in  std_logic                     := 'X'  ;            -- export
+--			startup_register_external_connection_export           : out  std_logic                     := 'X'  ;            -- export
+			counter_pll_period_external_connection_export         : out std_logic_vector(31 downto 0)    ;                 -- export
+			debug1_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug2_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug3_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug4_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug5_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug6_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X') ; -- export
+			debug1_out_external_connection_export                 : out std_logic_vector(15 downto 0);                     -- export
+			debug7_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug8_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug9_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug10_in_external_connection_export                  : in std_logic_vector(15 downto 0) := (others => 'X'); -- export
+			debug2_out_external_connection_export                 : out std_logic_vector(15 downto 0)       ;              -- export
+			start_spi_external_connection_export                  : out std_logic;                                        -- export
+			delay_spi_external_connection_export                  : out std_logic_vector(7 downto 0)   ;                   -- export
+			end_spi_external_connection_export                    : in  std_logic                     := 'X';              -- export
+			w_0_cb_external_connection_export                     : out std_logic_vector(15 downto 0)                     -- export
+			);
+	end component nios;
+	
+
+
+component pll_top is
+port (clk: in std_logic;
+		rst: in std_logic;
+		start: in std_logic;
+		va_in : in sfixed(REG_H downto REG_L);
+		vb_in : in sfixed(REG_H downto REG_L);
+		vc_in : in sfixed(REG_H downto REG_L);
+		wt_out : out sfixed(REG_H downto REG_L);
+		pi_out_debug : out sfixed(REG_H downto REG_L);
+		--omega_t_debug: out sfixed(12 downto -16);
+		sin_pll_out: out sfixed(REG_H downto REG_L);
+		cos_pll_out : out sfixed(REG_H downto REG_L);
+		minus_sin_pll_out : out sfixed(REG_H downto REG_L);
+		minus_cos_pll_out : out sfixed(REG_H downto REG_L);
+		vq_debug : out sfixed(REG_H downto REG_L);
+		end_signal: out std_logic
+);
+end component pll_top;
+
+component matrix_vector_multiplication_v2 is
+port (clk,rst,start: in std_logic;
+		matrix1_in: in array_matrix_3_3_C;
+		vector_in: in array_vector_3_C;
+		vector_out: out array_vector_3_C;
+		
+		mult_in_a_next: out sfixed_array_c(0 to 2);
+		mult_in_b_next: out sfixed_array_c(0 to 2);
+		acc_in_a_next: out sfixed_array_c(0 to 2);
+		acc_in_b_next: out sfixed_array_c(0 to 2);		
+		mult_out_reg: in sfixed_array_c(0 to 2);
+		acc_out_reg: in sfixed_array_c(0 to 2);	
+		mult_in_a_reg: in sfixed_array_c(0 to 2);
+		mult_in_b_reg: in sfixed_array_c(0 to 2);
+		acc_in_a_reg: in sfixed_array_c(0 to 2);
+		acc_in_b_reg: in sfixed_array_c(0 to 2);
+		load_mult: out std_logic_vector(0 to 2);
+		load_acc : out std_logic_vector(0 to 2);
+		
+		end_signal: out std_logic
+);
+end component matrix_vector_multiplication_v2;
+
+
+component test_controllo_correnti_top is
+port (clk: std_logic;
+		rst: std_logic;
+		start:std_logic;
+		i_alpha_ref_in : in sfixed(REG_H downto REG_L);
+		i_beta_ref_in : in sfixed(REG_H downto REG_L);
+		i_alpha_in : in sfixed(REG_H downto REG_L);
+		i_beta_in : in sfixed(REG_H downto REG_L);
+		s_alpha_k_1_in : in sfixed(REG_H downto REG_L);
+		s_beta_k_1_in : in sfixed(REG_H downto REG_L); 
+		vg_alpha_in : in sfixed(REG_H downto REG_L);
+		vg_beta_in : in sfixed(REG_H downto REG_L); 
+		s_alpha_opt_out : out sfixed(REG_H downto REG_L);
+		s_beta_opt_out : out sfixed(REG_H downto REG_L); 
+		end_signal : out std_logic
+);
+end component test_controllo_correnti_top;
+
+
+--component PI_ialphabeta_ref IS
+--  PORT( clk                               :   IN    std_logic;
+--        reset                             :   IN    std_logic;
+--        clk_enable                        :   IN    std_logic;
+--        v_ci                              :   IN    vector_of_std_logic_vector32(0 TO 11);  -- sfix32_En24 [12]
+--        iq_ref                            :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        cos                               :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        sin                               :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        integral_error_in                 :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        ce_out                            :   OUT   std_logic;
+--        i_alpha_ref                       :   OUT   std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        i_beta_ref                        :   OUT   std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        integral_error_out                :   OUT   std_logic_vector(31 DOWNTO 0)  -- sfix32_En24
+--        );
+--END component PI_ialphabeta_ref;
+
+
+component pi_id_ref_top is
+port( clk,rst,start : in std_logic;
+		vc_i : in sfixed_array_c(0 to 3*N-1);
+		id_ref: out sfixed(REG_H downto REG_L);
+		vdc_out: out sfixed(REG_H downto REG_L);
+		vc_a_out: out sfixed(REG_H downto REG_L);
+		vc_b_out: out sfixed(REG_H downto REG_L);
+		vc_c_out: out sfixed(REG_H downto REG_L);
+		
+		mult_in_a_next: out sfixed_array_c(0 to 2);
+		mult_in_b_next: out sfixed_array_c(0 to 2);
+		acc_in_a_next: out sfixed_array_c(0 to 2);
+		acc_in_b_next: out sfixed_array_c(0 to 2);	
+		mult_out_reg: in sfixed_array_c(0 to 2);
+		acc_out_reg: in sfixed_array_c(0 to 2);
+		mult_in_a_reg: in sfixed_array_c(0 to 2);
+		mult_in_b_reg: in sfixed_array_c(0 to 2);
+		acc_in_a_reg: in sfixed_array_c(0 to 2);
+		acc_in_b_reg: in sfixed_array_c(0 to 2);
+		load_mult: out std_logic_vector(0 to 2);
+		load_acc : out std_logic_vector(0 to 2);
+		
+		end_signal: out std_logic
+);
+end component pi_id_ref_top;
+
+
+--component alphabeta2abc IS
+--  PORT( clk                               :   IN    std_logic;
+--        reset                             :   IN    std_logic;
+--        clk_enable                        :   IN    std_logic;
+--        Salphabeta                        :   IN    vector_of_std_logic_vector32(0 TO 1);  -- sfix32_En24 [2]
+--        ce_out                            :   OUT   std_logic;
+--        Sa                                :   OUT   std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        Sb                                :   OUT   std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        Sc                                :   OUT   std_logic_vector(31 DOWNTO 0)  -- sfix32_En24
+--        );
+--END component alphabeta2abc;
+--
+--component test_HDL_costs_cap IS
+--  PORT( clk                               :   IN    std_logic;
+--        reset                             :   IN    std_logic;
+--        clk_enable                        :   IN    std_logic;
+--        vc_i                              :   IN    vector_of_std_logic_vector32(0 TO 11);  -- sfix32_En24 [12]
+--        Sabc                              :   IN    vector_of_std_logic_vector4(0 TO 2);  -- sfix4 [3]
+--        iabc                              :   IN    vector_of_std_logic_vector32(0 TO 2);  -- sfix32_En24 [3]
+--        s_i                               :   IN    vector_of_std_logic_vector2(0 TO 11);  -- sfix2 [12]
+--        iabc_pred                         :   IN    vector_of_std_logic_vector32(0 TO 2);  -- sfix32_En24 [3]
+--        ce_out                            :   OUT   std_logic;
+--        S_i_1                             :   OUT   vector_of_std_logic_vector2(0 TO 11)  -- sfix2 [12]
+--        );
+--END component test_HDL_costs_cap;
+
+component individual_balancing is -- considero input stabili!
+port (clk,rst: in std_logic;
+		start: in std_logic;
+		vc_i: in sfixed_array_c(0 to 3*N-1);--array_vc_abc_i;
+		S_abc : in sfixed_array_s(0 to 2);
+		i_abc : in sfixed_array_c(0 to 2);--in array_i_abc;
+		i_pred_abc : in sfixed_array_c(0 to 2);
+		S_k_1_abc: in sfixed2_array(0 to 3*N-1);
+		S_k_1_abc_out: out sfixed2_array(0 to 3*N-1);
+		
+		indeces_a_out : out integer_array(0 to N-1); -- TEST IB A
+		costs_a_out : out sfixed_array_c(0 to N-1);  -- TEST IB A
+		
+		S_out_a: out slv4_array(0 to N-1);
+		S_out_b: out slv4_array(0 to N-1);
+		S_out_c: out slv4_array(0 to N-1);
+		end_signal: out std_logic
+);
+end component individual_balancing;
+
+--component currents_predictions IS
+--  PORT( clk                               :   IN    std_logic;
+--        reset                             :   IN    std_logic;
+--        clk_enable                        :   IN    std_logic;
+--        ia                                :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        ib                                :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        ic                                :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        vg_a                              :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        vg_b                              :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        vg_c                              :   IN    std_logic_vector(31 DOWNTO 0);  -- sfix32_En24
+--        Sa                                :   IN    std_logic_vector(3 DOWNTO 0);  -- sfix4
+--        Sb                                :   IN    std_logic_vector(3 DOWNTO 0);  -- sfix4
+--        Sc                                :   IN    std_logic_vector(3 DOWNTO 0);  -- sfix4
+--        ce_out                            :   OUT   std_logic;
+--        iabc_pred                         :   OUT   vector_of_std_logic_vector32(0 TO 2)  -- sfix32_En24 [3]
+--        );
+--END component currents_predictions;
+
+component i_pred is
+port( clk,rst,start : in std_logic;
+		iabc : in sfixed_array_c(0 to 2);
+		vg_abc : in sfixed_array_c(0 to 2);
+		sabc : in sfixed_array_s(0 to 2);
+		iabc_pred : out sfixed_array_c(0 to 2);
+		
+		mult_in_a_next: out sfixed_array_c(0 to 2);
+		mult_in_b_next: out sfixed_array_c(0 to 2);
+		acc_in_a_next: out sfixed_array_c(0 to 2);
+		acc_in_b_next: out sfixed_array_c(0 to 2);	
+		mult_out_reg: in sfixed_array_c(0 to 2);
+		acc_out_reg: in sfixed_array_c(0 to 2);
+		mult_in_a_reg: in sfixed_array_c(0 to 2);
+		mult_in_b_reg: in sfixed_array_c(0 to 2);
+		acc_in_a_reg: in sfixed_array_c(0 to 2);
+		acc_in_b_reg: in sfixed_array_c(0 to 2);
+		load_mult: out std_logic_vector(0 to 2);
+		load_acc : out std_logic_vector(0 to 2);
+		
+		end_signal : out std_logic
+		);
+end component i_pred;
+
+
+
+component deadband_module is
+generic (DEADBAND : integer; 
+			N: integer
+);
+port (clk : in std_logic;
+		rst : in std_logic;
+		switching_in : in std_logic_vector(12*N-1 downto 0);
+		switching_db_out : out std_logic_vector(12*N-1 downto 0)		
+);
+end component deadband_module;
+
+
+
+component cluster_balancing_top is -- considero input stabili!
+port (clk,rst: in std_logic;
+		start: in std_logic;
+		iabc_in : in sfixed_array_c(0 to 2);
+		iabc_pred_in : in sfixed_array_c(0 to 2);
+		vc_abc_in : in sfixed_array_c(0 to 2);
+		Sabc_in : in sfixed_array_c(0 to 2); 
+		s_alpha_opt_in : in sfixed(REG_H downto REG_L);
+		s_beta_opt_in : in sfixed(REG_H downto REG_L);
+		
+		Sa_cb_out : out sfixed(REG_H downto REG_L);
+		Sb_cb_out : out sfixed(REG_H downto REG_L);
+		Sc_cb_out : out sfixed(REG_H downto REG_L);
+
+		sa0_out : out sfixed(REG_H downto REG_L);
+		sb0_out : out sfixed(REG_H downto REG_L);
+		sc0_out : out sfixed(REG_H downto REG_L);
+		
+--		w_0_cb_in : in sfixed(REG_H downto REG_L);
+		
+		end_signal: out std_logic
+);
+end component cluster_balancing_top;
+
+
+
+component voltages_currents_protection is
+port (rst : in std_logic;
+		clk : in std_logic;
+		iabc_in : in sfixed_array_c(0 to 2);
+		vc : in sfixed_array_c(0 to 3*N-1);	
+		
+		overcurrent_a : out std_logic;
+		overcurrent_b : out std_logic;		
+		overcurrent_c : out std_logic;		
+		overcurrent : out std_logic;
+		
+		unbalance_v : out std_logic
+);
+end component voltages_currents_protection;
+
+
+component down_counter_1_time is	
+port( clk, rst: in std_logic;
+		start : in std_logic;
+		period_in : in std_logic_vector(31 downto 0);
+		count_out : out std_logic_vector(31 downto 0);
+		end_count_out : out std_logic
+);
+end  component down_counter_1_time;
+
+
+
+component low_pass_filter is	
+port( clk, rst: in std_logic;
+		start : in std_logic;
+		signal_in: in sfixed_array_c(0 to 2);
+		signal_out: out sfixed_array_c(0 to 2);
+
+		
+		mult_in_a_next: out sfixed_array_c(0 to 2);
+		mult_in_b_next: out sfixed_array_c(0 to 2);
+		acc_in_a_next: out sfixed_array_c(0 to 2);
+		acc_in_b_next: out sfixed_array_c(0 to 2);	
+		mult_out_reg: in sfixed_array_c(0 to 2);
+		acc_out_reg: in sfixed_array_c(0 to 2);
+		mult_in_a_reg: in sfixed_array_c(0 to 2);
+		mult_in_b_reg: in sfixed_array_c(0 to 2);
+		acc_in_a_reg: in sfixed_array_c(0 to 2);
+		acc_in_b_reg: in sfixed_array_c(0 to 2);
+		load_mult: out std_logic_vector(0 to 2);
+		load_acc : out std_logic_vector(0 to 2);
+		
+		end_signal: out std_logic
+		);
+end component low_pass_filter;
+
+
+component spi_master_module is
+generic(
+			CLK_DIV : integer:=3; -- the clk frequency will be divided by 2*CLK_DIV
+			cpol :  std_logic:='0'; --clk polarity
+			cpha : std_logic:='0';  --clk phase
+			WORD : integer:=32
+);
+port (clk : in std_logic;
+		reset : in std_logic;
+
+		start: in std_logic;
+		data_tx_in : in std_logic_vector(WORD-1 downto 0);
+		data_rx_out : out std_logic_vector(WORD-1 downto 0); 
+		DELAY_CONSTANT : in integer:=12;
+
+		spi_miso_in: in std_logic;
+		spi_mosi_out: out std_logic;
+		spi_cs_out: out std_logic;
+		spi_clk_out: out  std_logic;
+
+		end_signal: out std_logic
+		
+);
+end component spi_master_module;
+
+
+
+
+begin
+
+process(clk,rst)
+begin
+	if rst='1' then
+		state_reg<=idle;
+		i_reg<=0;
+				
+		mult_in_a_reg<=(others=>(others=>'0'));
+		mult_in_b_reg<=(others=>(others=>'0'));
+		acc_in_a_reg<=(others=>(others=>'0'));
+		acc_in_b_reg<=(others=>(others=>'0'));
+		acc_out_reg<=(others=>(others=>'0'));
+		mult_out_reg<=(others=>(others=>'0'));
+		
+		i_va_norm_reg<=(others=>'0');
+		i_vb_norm_reg<=(others=>'0');
+		i_vc_norm_reg<=(others=>'0');
+		
+		i_ia_norm_reg<=(others=>'0');
+		i_ib_norm_reg<=(others=>'0');
+		i_ic_norm_reg<=(others=>'0');
+		
+		v_alpha_reg<=(others=>'0');
+		v_beta_reg<=(others=>'0');
+--		v_gamma_reg<=(others=>'0');
+		
+		i_alpha_reg<=(others=>'0');
+		i_beta_reg<=(others=>'0');
+--		i_gamma_reg<=(others=>'0');
+		i_alpha_ref_reg<=(others=>'0');
+		i_beta_ref_reg<=(others=>'0');
+--		i_gamma_ref_reg<=(others=>'0');
+		
+		integrator_error_idq_reg<=(others=>'0');
+		s_abc_opt_reg<=(others=>(others=>'0'));
+		
+		s_i_reg<=(others=>(others=>'0'));
+		
+		Sa_cb_reg<=((others=>'0'));
+		Sb_cb_reg<=((others=>'0'));
+		Sc_cb_reg<=((others=>'0'));
+		
+--		vc_1a_reg<=(others=>'0');
+--		vc_2a_reg<=(others=>'0');
+--		vc_3a_reg<=(others=>'0');
+--		vc_4a_reg<=(others=>'0');
+--		vc_1b_reg<=(others=>'0');
+--		vc_2b_reg<=(others=>'0');
+--		vc_3b_reg<=(others=>'0');
+--		vc_4b_reg<=(others=>'0');
+--		vc_1c_reg<=(others=>'0');
+--		vc_2c_reg<=(others=>'0');
+--		vc_3c_reg<=(others=>'0');
+--		vc_4c_reg<=(others=>'0');
+		vc_ip_reg<=(others=>(others=>'0'));
+		
+		s_alpha_opt_k_reg<=(others=>'0');
+		s_beta_opt_k_reg<=(others=>'0');
+		
+		i_ia_norm_reg_test<=(others=>'0');
+		i_ib_norm_reg_test<=(others=>'0');
+		i_ic_norm_reg_test<=(others=>'0');
+		
+		spi_state_reg<=spi_idle;
+		vc_a1_reg<=(others=>'0');
+		vc_a2_reg<=(others=>'0');
+		vc_b1_reg<=(others=>'0');
+		vc_b2_reg<=(others=>'0');
+		vc_c1_reg<=(others=>'0');
+		vc_c2_reg<=(others=>'0');
+		current_grid_a_reg<=(others=>'0');
+		current_grid_b_reg<=(others=>'0');
+		current_grid_c_reg<=(others=>'0');
+		
+		vc_1a_sfix_delay2_reg<=(others=>'0');
+		vc_2a_sfix_delay2_reg<=(others=>'0');
+		vc_1b_sfix_delay2_reg<=(others=>'0');
+		vc_2b_sfix_delay2_reg<=(others=>'0');
+		vc_1c_sfix_delay2_reg<=(others=>'0');
+		vc_2c_sfix_delay2_reg<=(others=>'0');
+		
+		i_ia_norm_delay2_reg<=(others=>'0');
+		i_ib_norm_delay2_reg<=(others=>'0');
+		i_ic_norm_delay2_reg<=(others=>'0');
+		
+		counter_start_dsp_reg<=0;
+
+	elsif clk'event and clk='1' then 
+		state_reg<=state_next;
+		i_reg<=i_next;
+		
+		mult_in_a_reg<=mult_in_a_next;
+		mult_in_b_reg<=mult_in_b_next;
+		mult_out_reg<=mult_out_next;
+		acc_in_a_reg<=acc_in_a_next;	
+		acc_in_b_reg<=acc_in_b_next;
+		acc_out_reg<=acc_out_next;
+		mult_out_reg<=mult_out_next;
+		
+		i_va_norm_reg<=i_va_norm_next;
+		i_vb_norm_reg<=i_vb_norm_next;
+		i_vc_norm_reg<=i_vc_norm_next;
+
+		i_ia_norm_reg<=i_ia_norm_next;
+		i_ib_norm_reg<=i_ib_norm_next;
+		i_ic_norm_reg<=i_ic_norm_next;
+
+		v_alpha_reg<=v_alpha_next;
+		v_beta_reg<=v_beta_next;
+--		v_gamma_reg<=v_gamma_next;
+		
+		i_alpha_reg<=i_alpha_next;
+		i_beta_reg<=i_beta_next;
+--		i_gamma_reg<=i_gamma_next;
+		i_alpha_ref_reg<=i_alpha_ref_next;
+		i_beta_ref_reg<=i_beta_ref_next;
+--		i_gamma_ref_reg<=i_gamma_ref_next;
+		
+		integrator_error_idq_reg<=integrator_error_idq_next;
+		s_abc_opt_reg<=s_abc_opt_next;
+		
+		s_i_reg<=s_i_next;
+		
+		Sa_cb_reg<=Sa_cb_next;
+		Sb_cb_reg<=Sb_cb_next;
+		Sc_cb_reg<=Sc_cb_next;
+		
+--		vc_1a_reg<=vc_1a_next;
+--		vc_2a_reg<=vc_2a_next;
+--		vc_3a_reg<=vc_3a_next;
+--		vc_4a_reg<=vc_4a_next;
+--		vc_1b_reg<=vc_1b_next;
+--		vc_2b_reg<=vc_2b_next;
+--		vc_3b_reg<=vc_3b_next;
+--		vc_4b_reg<=vc_4b_next;
+--		vc_1c_reg<=vc_1c_next;
+--		vc_2c_reg<=vc_2c_next;
+--		vc_3c_reg<=vc_3c_next;
+--		vc_4c_reg<=vc_4c_next;
+		vc_ip_reg<=vc_ip_next;
+		
+		s_alpha_opt_k_reg<=s_alpha_opt_k_next;
+		s_beta_opt_k_reg<=s_beta_opt_k_next;
+
+		i_ia_norm_reg_test<=i_ia_norm_next_test;
+		i_ib_norm_reg_test<=i_ib_norm_next_test;
+		i_ic_norm_reg_test<=i_ic_norm_next_test;
+	
+		spi_state_reg<=spi_state_next;
+		vc_a1_reg<=vc_a1_next;
+		vc_a2_reg<=vc_a2_next;
+		vc_b1_reg<=vc_b1_next;
+		vc_b2_reg<=vc_b2_next;
+		vc_c1_reg<=vc_c1_next;
+		vc_c2_reg<=vc_c2_next;
+		current_grid_a_reg<=current_grid_a_next;
+		current_grid_b_reg<=current_grid_b_next;
+		current_grid_c_reg<=current_grid_c_next;
+
+		vc_1a_sfix_delay_reg<=vc_1a_sfix_delay_next;
+		vc_2a_sfix_delay_reg<=vc_2a_sfix_delay_next;
+		vc_1b_sfix_delay_reg<=vc_1b_sfix_delay_next;
+		vc_2b_sfix_delay_reg<=vc_2b_sfix_delay_next;
+		vc_1c_sfix_delay_reg<=vc_1c_sfix_delay_next;
+		vc_2c_sfix_delay_reg<=vc_2c_sfix_delay_next;
+		i_ia_norm_delay_reg<=i_ia_norm_delay_next;
+		i_ib_norm_delay_reg<=i_ib_norm_delay_next;
+		i_ic_norm_delay_reg<=i_ic_norm_delay_next;
+
+		
+		vc_1a_sfix_delay2_reg<=vc_1a_sfix_delay2_next;
+		vc_2a_sfix_delay2_reg<=vc_2a_sfix_delay2_next;
+		vc_1b_sfix_delay2_reg<=vc_1b_sfix_delay2_next;
+		vc_2b_sfix_delay2_reg<=vc_2b_sfix_delay2_next;
+		vc_1c_sfix_delay2_reg<=vc_1c_sfix_delay2_next;
+		vc_2c_sfix_delay2_reg<=vc_2c_sfix_delay2_next;
+		i_ia_norm_delay2_reg<=i_ia_norm_delay2_next;
+		i_ib_norm_delay2_reg<=i_ib_norm_delay2_next;
+		i_ic_norm_delay2_reg<=i_ic_norm_delay2_next;
+		
+		counter_start_dsp_reg<=counter_start_dsp_next;
+		
+		end if;
+end process;
+
+
+
+process(state_reg,
+ mult_out_reg, acc_out_reg, mult_out_signal, acc_out_signal, mult_in_a_reg, mult_in_b_reg ,acc_in_a_reg, acc_in_b_reg,
+ mult_in_a_next_mv, mult_in_b_next_mv, acc_in_a_next_mv, acc_in_b_next_mv, mult_out_next_mv, acc_out_next_mv , end_signal_mv, vector_out,
+ i_va_norm_reg, i_vb_norm_reg, i_vc_norm_reg, i_va_sfix, i_vb_sfix, i_vc_sfix,
+ v_alpha_reg, v_beta_reg, --v_gamma_reg,
+ i_ia_norm_reg, i_ib_norm_reg, i_ic_norm_reg, i_alpha_reg, i_beta_reg,
+ i_ia_sfix, i_ib_sfix, i_ic_sfix, load_mult_mv, load_acc_mv, end_signal_pll,
+ id_ref, iq_ref, vector_in, cos_pll_out, sin_pll_out, minus_sin_pll_out, end_currents_control, minus_cos_pll_out,
+ i_reg, integrator_error_idq_reg, Sa_cb, Sb_cb, Sc_cb,
+ start_control_nios, start_pll_nios, s_abc_opt_reg, s_i_reg, integral_error_idq_signal, s_i_signal,i_alpha_ref_reg,i_beta_ref_reg,
+ Sa_cb_reg,Sb_cb_reg,Sc_cb_reg, end_signal_pi, iq_ref_sfix, s_alpha_opt, s_beta_opt,
+ mult_in_a_next_pi, mult_in_b_next_pi, acc_in_a_next_pi, acc_in_b_next_pi, mult_out_next_pi, acc_out_next_pi, load_mult_pi, load_acc_pi,end_signal_ib,
+-- vc_1a_reg,vc_2a_reg,vc_3a_reg,vc_4a_reg, vc_1b_reg,vc_2b_reg,vc_3b_reg,vc_4b_reg, vc_1c_reg,vc_2c_reg,vc_3c_reg,vc_4c_reg,
+ vc_ip_reg,
+ vc_1a_sfix,vc_2a_sfix,vc_3a_sfix,vc_4a_sfix, vc_1b_sfix,vc_2b_sfix,vc_3b_sfix,vc_4b_sfix, vc_1c_sfix,vc_2c_sfix,vc_3c_sfix,vc_4c_sfix,
+ mult_in_a_next_pred, mult_in_b_next_pred, acc_in_a_next_pred, acc_in_b_next_pred, mult_out_next_pred, acc_out_next_pred, load_acc_pred, load_mult_pred,
+ s_alpha_opt_k_reg,s_beta_opt_k_reg, end_signal_cb, end_signal_pred, end_period_pll, i_ia_sfix_CT,i_ib_sfix_CT,i_ic_sfix_CT,
+ start_lpf, end_signal_lpf, load_acc_lpf, load_mult_lpf, mult_in_a_next_lpf, mult_in_b_next_lpf, acc_in_a_next_lpf, acc_in_b_next_lpf,
+ i_ia_norm_reg_test, i_ib_norm_reg_test, i_ic_norm_reg_test
+ )
+begin
+
+mult_in_a_next<=mult_in_a_reg;
+mult_in_b_next<=mult_in_b_reg;
+acc_in_a_next<=acc_in_a_reg;
+acc_in_b_next<=acc_in_b_reg;
+load_acc<=(others=>'0');
+load_mult<=(others=>'0');
+
+mult_in_a_reg_mv<=(others=>(others=>'0'));
+mult_in_b_reg_mv<=(others=>(others=>'0'));
+acc_in_a_reg_mv<=(others=>(others=>'0'));
+acc_in_b_reg_mv<=(others=>(others=>'0'));
+
+mult_in_a_reg_pi<=(others=>(others=>'0'));
+mult_in_b_reg_pi<=(others=>(others=>'0'));
+acc_in_a_reg_pi<=(others=>(others=>'0'));
+acc_in_b_reg_pi<=(others=>(others=>'0'));
+
+mult_in_a_reg_lpf<=(others=>(others=>'0'));
+mult_in_b_reg_lpf<=(others=>(others=>'0'));
+acc_in_a_reg_lpf<=(others=>(others=>'0'));
+acc_in_b_reg_lpf<=(others=>(others=>'0'));
+
+mult_in_a_reg_pred<=(others=>(others=>'0'));
+mult_in_b_reg_pred<=(others=>(others=>'0'));
+acc_in_a_reg_pred<=(others=>(others=>'0'));
+acc_in_b_reg_pred<=(others=>(others=>'0'));
+
+start_pll<='0';
+start_mv<='0';
+start_currents_control<='0';
+
+matrix1_in<=(others=>(others=>(others=>'0')));
+vector_in<= (others=>(others=>'0'));
+
+i_next<=i_reg;
+
+end_signal<='0';
+
+i_va_norm_next<=i_va_norm_reg;
+i_vb_norm_next<=i_vb_norm_reg;
+i_vc_norm_next<=i_vc_norm_reg;
+i_ia_norm_next<=i_ia_norm_reg;
+i_ib_norm_next<=i_ib_norm_reg;
+i_ic_norm_next<=i_ic_norm_reg;
+
+
+i_ia_norm_next_test<=i_ia_norm_reg_test;
+i_ib_norm_next_test<=i_ib_norm_reg_test;
+i_ic_norm_next_test<=i_ic_norm_reg_test;
+
+
+
+--en_pi<='0';
+integrator_error_idq_next<=integrator_error_idq_reg;
+--en_i_pred<='0';
+--en_cluster_balancing<='0';
+--en_individual_balancing<='0';
+
+s_abc_opt_next<=s_abc_opt_reg;
+
+v_alpha_next<=v_alpha_reg;
+v_beta_next<=v_beta_reg;
+--v_gamma_next<=v_gamma_reg;
+
+i_alpha_next<=i_alpha_reg;
+i_beta_next<=i_beta_reg;
+--i_gamma_next<=i_gamma_reg;
+
+s_i_next<=s_i_reg;
+
+i_alpha_ref_next<=i_alpha_ref_reg;
+i_beta_ref_next<=i_beta_ref_reg;
+
+Sa_cb_next<=Sa_cb_reg;
+Sb_cb_next<=Sb_cb_reg;
+Sc_cb_next<=Sc_cb_reg;
+
+start_pi<='0';
+start_ib<='0';
+start_cb<='0';
+start_lpf<='0';
+
+--vc_1a_next<=vc_1a_reg;
+--vc_2a_next<=vc_2a_reg;
+--vc_3a_next<=vc_3a_reg;
+--vc_4a_next<=vc_4a_reg;
+--vc_1b_next<=vc_1b_reg;
+--vc_2b_next<=vc_2b_reg;
+--vc_3b_next<=vc_3b_reg;
+--vc_4b_next<=vc_4b_reg;
+--vc_1c_next<=vc_1c_reg;
+--vc_2c_next<=vc_2c_reg;
+--vc_3c_next<=vc_3c_reg;
+--vc_4c_next<=vc_4c_reg;
+vc_ip_next<=vc_ip_reg;
+
+start_pred<='0';
+
+s_alpha_opt_k_next<=s_alpha_opt_k_reg;
+s_beta_opt_k_next<=s_beta_opt_k_reg;
+
+vc_1a_sfix_delay_next<=vc_1a_sfix_delay_reg;
+vc_2a_sfix_delay_next<=vc_2a_sfix_delay_reg;
+vc_1b_sfix_delay_next<=vc_1b_sfix_delay_reg;
+vc_2b_sfix_delay_next<=vc_2b_sfix_delay_reg;
+vc_1c_sfix_delay_next<=vc_1c_sfix_delay_reg;
+vc_2c_sfix_delay_next<=vc_2c_sfix_delay_reg;
+i_ia_norm_delay_next<=i_ia_norm_delay_reg;
+i_ib_norm_delay_next<=i_ib_norm_delay_reg;
+i_ic_norm_delay_next<=i_ic_norm_delay_reg;
+
+vc_1a_sfix_delay2_next<=vc_1a_sfix_delay2_reg;
+vc_2a_sfix_delay2_next<=vc_2a_sfix_delay2_reg;
+vc_1b_sfix_delay2_next<=vc_1b_sfix_delay2_reg;
+vc_2b_sfix_delay2_next<=vc_2b_sfix_delay2_reg;
+vc_1c_sfix_delay2_next<=vc_1c_sfix_delay2_reg;
+vc_2c_sfix_delay2_next<=vc_2c_sfix_delay2_reg;
+i_ia_norm_delay2_next<=i_ia_norm_delay2_reg;
+i_ib_norm_delay2_next<=i_ib_norm_delay2_reg;
+i_ic_norm_delay2_next<=i_ic_norm_delay2_reg;
+
+	case state_reg is
+		when idle=>
+			if start_pll_nios='1' then
+				state_next<=norm_voltages_load_m_op;
+			else
+				state_next<=idle;
+			end if;
+			
+		when norm_voltages_load_m_op=>
+			mult_in_a_next(0)<=i_va_sfix;
+			mult_in_b_next(0)<=sfix_v_norm_factor_C;
+			
+			mult_in_a_next(1)<=i_vb_sfix;
+			mult_in_b_next(1)<=sfix_v_norm_factor_C;
+			
+			mult_in_a_next(2)<=i_vc_sfix;
+			mult_in_b_next(2)<=sfix_v_norm_factor_C;
+			
+			state_next<=norm_voltages_load_m_res;
+			
+		when norm_voltages_load_m_res=>
+			load_mult<="111";
+			
+			state_next<=norm_grid_voltages_store;
+			
+		when norm_grid_voltages_store => --norm_currents_load_m_op=>
+			i_va_norm_next<=mult_out_reg(0);
+			i_vb_norm_next<=mult_out_reg(1);
+			i_vc_norm_next<=mult_out_reg(2);
+			
+			state_next<=compute_pll;
+	
+		when compute_pll=> --in the same time i compute the alpha-beta transform of vabc
+			start_pll<='1';
+			start_mv<='1';
+			matrix1_in<=clarke_matrix_c;--(  (cos_pll_out, minus_sin_pll_out, sfix_0 ), (sin_pll_out, cos_pll_out, sfix_0), (sfix_0, sfix_0, sfix_1) )   ;
+			vector_in<= (i_va_norm_reg, i_vb_norm_reg, i_vc_norm_reg); 
+			
+			mult_in_a_next<=mult_in_a_next_mv;
+			mult_in_b_next<=mult_in_b_next_mv;
+			acc_in_a_next<=acc_in_a_next_mv;
+			acc_in_b_next<=acc_in_b_next_mv;
+			load_mult<=load_mult_mv;
+			load_acc<=load_acc_mv;
+			
+			if (end_signal_mv and end_signal_pll)='1' then
+				state_next<=alpha_beta_transform_v_store;
+			else
+				state_next<=compute_pll;
+			end if;
+
+		when alpha_beta_transform_v_store=>
+			v_alpha_next<=vector_out(0);
+			v_beta_next<=vector_out(1);
+--			v_gamma_next<=vector_out(2);
+
+			if start_control_nios='0' then -- if capacitors voltages are not yes measured then wait it 
+				state_next<=alpha_beta_transform_v_store;
+			else
+				state_next<=norm_currents_load_m_op_test;--norm_currents_load_m_op;
+
+			end if;
+			
+		when norm_currents_load_m_op_test=>
+			mult_in_a_next(0)<=i_ia_sfix_CT;--i_ia_sfix_CT;--
+			mult_in_b_next(0)<=sfix_i_norm_factor_CT;--sfix_i_norm_factor_CT;
+
+			mult_in_a_next(1)<=i_ib_sfix_CT;--i_ib_sfix_CT;--
+			mult_in_b_next(1)<=sfix_i_norm_factor_CT;--sfix_i_norm_factor_CT;
+			
+			mult_in_a_next(2)<=i_ic_sfix_CT;--i_ic_sfix_CT;--
+			mult_in_b_next(2)<=sfix_i_norm_factor_CT;--sfix_i_norm_factor_CT;
+			
+			state_next<=norm_currents_load_m_res_test;	
+		when norm_currents_load_m_res_test=>
+			load_mult<="111";
+			
+			state_next<=norm_currents_load_m_op;--norm_currents_store;	
+			
+--			i_ia_norm_next<=i_ia_norm_delay2_reg;--mult_out_reg(0);
+--			i_ib_norm_next<=i_ib_norm_delay2_reg;--mult_out_reg(1);
+--			i_ic_norm_next<=i_ic_norm_delay2_reg;--mult_out_reg(2);
+--			
+--			
+--			i_ia_norm_delay2_next<=i_ia_norm_delay_reg;
+--			i_ib_norm_delay2_next<=i_ib_norm_delay_reg;
+--			i_ic_norm_delay2_next<=i_ic_norm_delay_reg;
+
+		when norm_currents_load_m_op =>			
+			
+			i_ia_norm_next_test<=mult_out_reg(0);
+			i_ib_norm_next_test<=mult_out_reg(1);
+			i_ic_norm_next_test<=mult_out_reg(2);
+			
+			mult_in_a_next(0)<=i_ia_sfix;--i_ia_sfix_CT;--
+			mult_in_b_next(0)<=sfix_ia_norm_factor_C;--sfix_i_norm_factor_CT;--
+
+			mult_in_a_next(1)<=i_ib_sfix;--i_ib_sfix_CT;--
+			mult_in_b_next(1)<=sfix_ib_norm_factor_C;--sfix_i_norm_factor_CT;--
+			
+			mult_in_a_next(2)<=i_ic_sfix;--i_ic_sfix_CT;--
+			mult_in_b_next(2)<=sfix_ic_norm_factor_C;--sfix_i_norm_factor_CT;--
+			
+			state_next<=norm_currents_load_m_res;
+			
+		when norm_currents_load_m_res=>
+			load_mult<="111";
+			
+			state_next<=norm_currents_load_a_op;--norm_currents_store;
+			
+		when norm_currents_load_a_op=>
+
+			acc_in_a_next(0)<=mult_out_reg(0);--ia_norm;
+			acc_in_b_next(0)<=(others=>'0');--signal_filtered(0); -- DC component extracted from the filtered measurmentse from h-brid
+			
+			acc_in_a_next(1)<=mult_out_reg(1);--ib_norm;
+			acc_in_b_next(1)<=(others=>'0');--signal_filtered(1); -- DC component extracted from the filtered measurmentse from h-brid
+		
+			acc_in_a_next(2)<=mult_out_reg(2);--ic_norm;
+			acc_in_b_next(2)<=(others=>'0');--signal_filtered(2); -- DC component extracted from the filtered measurmentse from h-brid
+			
+			state_next<=norm_currents_load_a_res;
+			
+		when norm_currents_load_a_res=>
+			load_acc<="111";
+
+			state_next<=norm_currents_store;			
+			
+		when norm_currents_store=>
+			i_ia_norm_next<=acc_out_reg(0);--mult_out_reg(0);
+			i_ib_norm_next<=acc_out_reg(1);--mult_out_reg(1);
+			i_ic_norm_next<=acc_out_reg(2);--mult_out_reg(2);
+			
+			state_next<=alpha_beta_transform_i;
+	
+		when alpha_beta_transform_i=> --here I test also the PLL end
+
+			start_mv<='1';
+			matrix1_in<=clarke_matrix_c;
+			vector_in<= (i_ia_norm_reg, i_ib_norm_reg, i_ic_norm_reg); 
+			
+			mult_in_a_next<=mult_in_a_next_mv;
+			mult_in_b_next<=mult_in_b_next_mv;
+			acc_in_a_next<=acc_in_a_next_mv;
+			acc_in_b_next<=acc_in_b_next_mv;
+			load_mult<=load_mult_mv;
+			load_acc<=load_acc_mv;
+			
+--			state_next<=norm_capacitors_load_m_op1;
+			if end_signal_mv='1' then
+				state_next<=norm_capacitors_load_m_op1;
+			else
+				state_next<=alpha_beta_transform_i;
+			end if;			
+			
+		when norm_capacitors_load_m_op1=>
+			i_alpha_next<=vector_out(0);
+			i_beta_next<=vector_out(1);
+--			i_gamma_next<=vector_out(2);	
+
+			mult_in_a_next(0)<=vc_1a_sfix;
+			mult_in_b_next(0)<=sfix_vc_a1_norm_factor_C;
+			
+			mult_in_a_next(1)<=vc_1b_sfix;
+			mult_in_b_next(1)<=sfix_vc_b1_norm_factor_C;
+			
+			mult_in_a_next(2)<=vc_1c_sfix;
+			mult_in_b_next(2)<=sfix_vc_c1_norm_factor_C;
+					
+			state_next<=norm_capacitors_load_m_res1;
+			
+		when norm_capacitors_load_m_res1=>
+
+			load_mult<="111";
+			
+			state_next<=norm_capacitors_load_m_op2;
+			
+--			vc_ip_next(0)<=vc_1a_sfix_delay2_reg;--mult_out_reg(0);
+--			vc_ip_next(N)<=vc_1b_sfix_delay2_reg;--mult_out_reg(1);
+--			vc_ip_next(2*N)<=vc_1c_sfix_delay2_reg;--mult_out_reg(2);
+--			
+--			
+--			vc_1a_sfix_delay2_next<=vc_1a_sfix_delay_reg;
+--			vc_1b_sfix_delay2_next<=vc_1b_sfix_delay_reg;
+--			vc_1c_sfix_delay2_next<=vc_1c_sfix_delay_reg;
+			
+		when norm_capacitors_load_m_op2=>
+
+			vc_ip_next(0)<=mult_out_reg(0);--mult_out_reg(0);
+			vc_ip_next(N)<=mult_out_reg(1);--mult_out_reg(1);
+			vc_ip_next(2*N)<=mult_out_reg(2);--mult_out_reg(2);
+			
+--			vc_1a_sfix_delay_next<=mult_out_reg(0);
+--			vc_1b_sfix_delay_next<=mult_out_reg(1);
+--			vc_1c_sfix_delay_next<=mult_out_reg(2);
+
+			mult_in_a_next(0)<=vc_2a_sfix;
+			mult_in_b_next(0)<=sfix_vc_a2_norm_factor_C;
+			
+			mult_in_a_next(1)<=vc_2b_sfix;
+			mult_in_b_next(1)<=sfix_vc_b2_norm_factor_C;
+			
+			mult_in_a_next(2)<=vc_2c_sfix;
+			mult_in_b_next(2)<=sfix_vc_c2_norm_factor_C;
+
+			state_next<=norm_capacitors_load_m_res2;
+			
+		when norm_capacitors_load_m_res2=>
+
+			load_mult<="111";
+			
+			state_next<=norm_capacitors_load_m_op3;
+
+
+--			vc_ip_next(1)<=vc_2a_sfix_delay2_reg;--mult_out_reg(0);
+--			vc_ip_next(1+N)<=vc_2b_sfix_delay2_reg;--mult_out_reg(1);
+--			vc_ip_next(1+2*N)<=vc_2c_sfix_delay2_reg;--mult_out_reg(2);
+--			
+--			vc_2a_sfix_delay2_next<=vc_2a_sfix_delay_reg;
+--			vc_2b_sfix_delay2_next<=vc_2b_sfix_delay_reg;
+--			vc_2c_sfix_delay2_next<=vc_2c_sfix_delay_reg;
+	
+	when norm_capacitors_load_m_op3=>
+
+			vc_ip_next(1)<=mult_out_reg(0);--mult_out_reg(0);
+			vc_ip_next(1+N)<=mult_out_reg(1);--mult_out_reg(1);
+			vc_ip_next(1+2*N)<=mult_out_reg(2);--mult_out_reg(2);
+
+--			vc_2a_sfix_delay_next<=mult_out_reg(0);
+--			vc_2b_sfix_delay_next<=mult_out_reg(1);
+--			vc_2c_sfix_delay_next<=mult_out_reg(2);
+
+						
+--			if end_signal_mv='1' then
+--			state_next<=alpha_beta_transform_i_store;
+----			else
+----				state_next<=norm_capacitors_load_m_op3;
+----			end if;
+--			
+--			
+--		when alpha_beta_transform_i_store=>
+			
+--			i_next<=0;			
+				if end_period_pll='1' then -- when pll time expired then computes the control
+					state_next<=compute_idq_ref;--norm_capacitors_load_m_op1;
+				else
+					state_next<=end_state; --when capacitors are measured but pll time is not expired then control must not be computed and exit the loop
+				end if;					
+			
+		when compute_idq_ref=>
+			start_pi<='1';
+			
+			mult_in_a_next<=mult_in_a_next_pi;
+			mult_in_b_next<=mult_in_b_next_pi;
+			acc_in_a_next<=acc_in_a_next_pi;
+			acc_in_b_next<=acc_in_b_next_pi;
+			load_mult<=load_mult_pi;
+			load_acc<=load_acc_pi;
+			
+			if end_signal_pi='1' then
+				state_next<=alpha_beta_transform_i_ref;
+			else
+				state_next<=compute_idq_ref;
+			end if;
+
+			
+		when alpha_beta_transform_i_ref=> 
+			start_mv<='1';
+--			matrix1_in<=(  (cos_pll_out, minus_sin_pll_out, sfix_0_c ), (sin_pll_out, cos_pll_out, sfix_0_c), (sfix_0_c, sfix_0_c, sfix_1_c) )   ;
+			matrix1_in<=(  (sin_pll_out, cos_pll_out, sfix_0_c ), (minus_cos_pll_out, sin_pll_out, sfix_0_c), (sfix_0_c, sfix_0_c, sfix_1_c) )   ;
+
+			vector_in<= (id_ref, iq_ref_sfix, sfix_0_c); 
+			
+			mult_in_a_next<=mult_in_a_next_mv;
+			mult_in_b_next<=mult_in_b_next_mv;
+			acc_in_a_next<=acc_in_a_next_mv;
+			acc_in_b_next<=acc_in_b_next_mv;
+			load_mult<=load_mult_mv;
+			load_acc<=load_acc_mv;
+			
+			if end_signal_mv='1' then
+				state_next<=alpha_beta_transform_i_ref_store;
+			else
+				state_next<=alpha_beta_transform_i_ref;
+			end if;
+			
+		when alpha_beta_transform_i_ref_store=>
+			i_alpha_ref_next<=vector_out(0);
+			i_beta_ref_next<=vector_out(1);
+--			i_gamma_ref_next<=vector_out(2);		
+					
+			state_next<=compute_current_control;			
+			
+			
+		when compute_current_control=>
+--			integrator_error_idq_next<=integral_error_idq_signal;
+		
+			start_currents_control<='1'; -- about 46 clock cycles
+--			en_i_pred<='1'; --just 8 clock cycles needed
+			start_pred<='1';
+			mult_in_a_next<=mult_in_a_next_pred;
+			mult_in_b_next<=mult_in_b_next_pred;
+			acc_in_a_next<=acc_in_a_next_pred;
+			acc_in_b_next<=acc_in_b_next_pred;
+			load_mult<=load_mult_pred;
+			load_acc<=load_acc_pred;
+			
+			if end_currents_control='1' and end_signal_pred='1' then
+				state_next<=compute_cluster_balancing;
+			else
+				state_next<=compute_current_control;
+			end if;
+			
+		when compute_cluster_balancing=>
+			s_alpha_opt_k_next<=s_alpha_opt;
+			s_beta_opt_k_next<=s_beta_opt;
+			start_cb<='1';
+
+			start_lpf<='1';
+			mult_in_a_next<=mult_in_a_next_lpf;
+			mult_in_b_next<=mult_in_b_next_lpf;
+			acc_in_a_next<=acc_in_a_next_lpf;
+			acc_in_b_next<=acc_in_b_next_lpf;
+			load_mult<=load_mult_lpf;
+			load_acc<=load_acc_lpf;
+--
+--			if end_signal_mv='1' then
+--				state_next<=cluster_balancing_store;
+--			else
+--				state_next<=compute_cluster_balancing;
+--			end if;
+
+			if end_signal_cb='1' and end_signal_lpf='1' then
+				state_next<=compute_individual_balancing;
+			else
+				state_next<=compute_cluster_balancing;
+			end if;
+			
+			
+--		when cluster_balancing_store=> -- comprende il round(Sabc)
+----			Sa_cb_next<=(resize(resize( vector_out(0),Sa_cb_reg'high,0 ), Sa_cb_reg'high, Sa_cb_reg'low  ));
+----			Sb_cb_next<=(resize(resize( vector_out(1),Sa_cb_reg'high,0 ), Sa_cb_reg'high, Sa_cb_reg'low  ));
+----			Sc_cb_next<=(resize(resize( vector_out(2),Sa_cb_reg'high,0 ), Sa_cb_reg'high, Sa_cb_reg'low  ));
+--			Sa_cb_next<= resize( vector_out(0),SABC_H, SABC_L);
+--			Sb_cb_next<= resize( vector_out(1),SABC_H, SABC_L);
+--			Sc_cb_next<= resize( vector_out(2),SABC_H, SABC_L);
+--			state_next<=compute_individual_balancing;
+			
+			
+		when compute_individual_balancing=>
+			s_abc_opt_next<= (Sa_cb, Sb_cb, Sc_cb);
+			
+--			en_individual_balancing<='1';
+--			i_next<=i_reg+1;
+--			
+--			if i_reg<I_TRESHOLD_CB+I_TRESHOLD_I_REF+ I_TRESHOLD_IB then
+--				state_next<=compute_individual_balancing;
+--			else
+--				state_next<=control_store;
+--			end if;
+			start_ib<='1';
+			
+			if end_signal_ib='1' then
+				state_next<=control_store;
+			else
+				state_next<=compute_individual_balancing;
+			end if;
+			
+		when control_store=> --salva il controllo in registri... i registri sono collegati ai moduli dead band
+			s_i_next<=s_i_signal; --control signals
+			
+			-- qui si deve introdurre la dead band
+			state_next<=end_state;
+			
+		when end_state=>
+			end_signal<='1';
+			
+			if start_pll_nios='1' then 
+				state_next<=end_state;
+			else
+				state_next<=idle;
+			end if;
+			
+	end case;
+end process;
+
+		
+		
+	u0 : component nios
+		port map (
+			clk_clk                                  => clk,                                  --                               clk.clk
+			reset_reset_n                                         => reset_n,                                          --                                          reset.reset_n
+--			pio_grid_a_external_connection_export => grid_rx_a, -- spi_a_external_connection.export
+--			pio_grid_b_external_connection_export => grid_rx_b, -- spi_b_external_connection.export
+--			pio_grid_c_external_connection_export => grid_rx_c,  -- spi_c_external_connection.export
+			pio_iq_ref_external_connection_export    => iq_ref,     --    pio_iq_ref_external_connection.exportt
+--			spi_grid_a_external_MISO         => spi_grid_MISO_a,         --       spi_grid_a_external.MISO
+--			spi_grid_a_external_MOSI         => spi_grid_MOSI_a,         --                          .MOSI
+--			spi_grid_a_external_SCLK         => spi_grid_SCK_a,         --                          .SCLK
+--			spi_grid_a_external_SS_n         => spi_grid_SS_n_a,         --                          .SS_n
+--			spi_grid_b_external_MISO         => spi_grid_MISO_b,         --       spi_grid_b_external.MISO
+--			spi_grid_b_external_MOSI         => spi_grid_MOSI_b,         --                          .MOSI
+--			spi_grid_b_external_SCLK         => spi_grid_SCK_b,         --                          .SCLK
+--			spi_grid_b_external_SS_n         => spi_grid_SS_n_b,         --                          .SS_n
+--			spi_grid_c_external_MISO         => spi_grid_MISO_c,         --       spi_grid_c_external.MISO
+--			spi_grid_c_external_MOSI         => spi_grid_MOSI_c,         --                          .MOSI
+--			spi_grid_c_external_SCLK         => spi_grid_SCK_c,         --                          .SCLK
+--			spi_grid_c_external_SS_n         => spi_grid_SS_n_c,         --                          .SS_n
+			start_control_external_connection_export => start_control_nios, -- start_control_external_connection.export
+			timer_control_external_port_export => timer_control_pulse, -- just for debugging, 1 every control_period
+			start_pll_external_connection_export     => start_pll_nios,      --     start_pll_external_connection.export
+--			spi_vc_a1_external_MISO                  => spi_0_MISO,                  --                spi_vc_a1_external.MISO
+--			spi_vc_a1_external_MOSI                  => spi_0_MOSI,                  --                                  .MOSI
+--			spi_vc_a1_external_SCLK                  => spi_0_SCLK,                  --                                  .SCLK
+--			spi_vc_a1_external_SS_n                  => spi_0_SS_n,                  --                                  .SS_n
+--			spi_vc_a2_external_MISO                  => spi_1_MISO,                  --                spi_vc_a2_external.MISO
+--			spi_vc_a2_external_MOSI                  => spi_1_MOSI,                  --                                  .MOSI
+--			spi_vc_a2_external_SCLK                  => spi_1_SCLK,                  --                                  .SCLK
+--			spi_vc_a2_external_SS_n                  => spi_1_SS_n,                  --                                  .SS_n
+--			spi_vc_b1_external_MISO                  => spi_16_MISO,                  --                spi_vc_b1_external.MISO
+--			spi_vc_b1_external_MOSI                  => spi_16_MOSI,                  --                                  .MOSI
+--			spi_vc_b1_external_SCLK                  => spi_16_SCLK,                  --                                  .SCLK
+--			spi_vc_b1_external_SS_n                  => spi_16_SS_n,                  --                                  .SS_n
+--			spi_vc_b2_external_MISO                  => spi_17_MISO,                  --                spi_vc_b2_external.MISO
+--			spi_vc_b2_external_MOSI                  => spi_17_MOSI,                  --                                  .MOSI
+--			spi_vc_b2_external_SCLK                  => spi_17_SCLK,                  --                                  .SCLK
+--			spi_vc_b2_external_SS_n                  => spi_17_SS_n,                  --                                  .SS_n
+--			spi_vc_c1_external_MISO                  => spi_32_MISO,                  --                spi_vc_c1_external.MISO
+--			spi_vc_c1_external_MOSI                  => spi_32_MOSI,                  --                                  .MOSI
+--			spi_vc_c1_external_SCLK                  => spi_32_SCLK,                  --                                  .SCLK
+--			spi_vc_c1_external_SS_n                  => spi_32_SS_n,                  --                                  .SS_n
+--			spi_vc_c2_external_MISO                  => spi_34_MISO,                  --                spi_vc_c2_external.MISO
+--			spi_vc_c2_external_MOSI                  => spi_34_MOSI,                  --                                  .MOSI
+--			spi_vc_c2_external_SCLK                  => spi_34_SCLK,                  --                                  .SCLK
+--			spi_vc_c2_external_SS_n                  => spi_34_SS_n,                  --                                  .SS_n
+--			pio_vc_a1_external_connection_export     => pio_vc_i_a1,     --     pio_vc_a1_external_connection.export
+--			pio_vc_a2_external_connection_export     => pio_vc_i_a2,     --     pio_vc_a2_external_connection.export
+--			pio_vc_b1_external_connection_export     => pio_vc_i_b1,     --     pio_vc_b1_external_connection.export
+--			pio_vc_b2_external_connection_export     => pio_vc_i_b2,     --     pio_vc_b2_external_connection.export
+--			pio_vc_c1_external_connection_export     => pio_vc_i_c1,     --     pio_vc_c1_external_connection.export
+--			pio_vc_c2_external_connection_export     => pio_vc_i_c2,     --     pio_vc_c2_external_connection.export
+			switching_signals_register_external_connection_export => switching_register,  -- switching_signals_register_external_connection.export
+			output_ib_external_connection_export                  => output_ib,                   --                  output_ib_external_connection.export
+			protection_register_external_connection_export => protection_register,  -- protection_register_external_connection.export
+			end_control_external_connection_export                => end_signal           ,      --                end_control_external_connection.export
+--			startup_register_external_connection_export           => startup_signal       ,     --           startup_register_external_connection.export
+			counter_pll_period_external_connection_export         => period_to_wait_pll       ,   --         counter_pll_period_external_connection.export
+			debug1_in_external_connection_export                  => debug1_slv,                  --                  debug1_in_external_connection.export
+			debug2_in_external_connection_export                  => debug2_slv,                  --                  debug2_in_external_connection.export
+			debug3_in_external_connection_export                  => debug3_slv,                  --                  debug3_in_external_connection.export
+			debug4_in_external_connection_export                  => debug4_slv,                  --                  debug4_in_external_connection.export
+			debug5_in_external_connection_export                  => debug5_slv,                  --                  debug5_in_external_connection.export
+			debug6_in_external_connection_export                  => debug6_slv  ,                 --                  debug6_in_external_connection.export
+			debug7_in_external_connection_export                  => debug7_slv,                  --                  debug1_in_external_connection.export
+			debug8_in_external_connection_export                  => debug8_slv,                  --                  debug2_in_external_connection.export
+			debug9_in_external_connection_export                  => debug9_slv,                  --                  debug3_in_external_connection.export
+			debug10_in_external_connection_export                  => debug10_slv,                  --                  debug4_in_external_connection.export
+			debug1_out_external_connection_export                 => debug1_out ,                 --                 debug1_out_external_connection.export
+			debug2_out_external_connection_export                 => debug2_out  ,                --                 debug1_out_external_connection.export
+			start_spi_external_connection_export      =>start_spi,
+			delay_spi_external_connection_export         => delay_spi,
+			end_spi_external_connection_export          =>end_signal_spi		,
+			w_0_cb_external_connection_export                     => w_0_cb_nios  
+			);
+		
+pll_grid: pll_top 
+port map(clk=>clk,
+			rst=>rst,
+			start=>start_pll,
+			va_in=>i_va_norm_reg,
+			vb_in=>i_vb_norm_reg,
+			vc_in=>i_vc_norm_reg,
+			wt_out=>i_wt_pll,
+			pi_out_debug =>open,--pi_out_debug,
+			--omega_t_debug: out sfixed(12 downto -16);
+			sin_pll_out=>sin_pll_out, --sin_out_sc,--
+			cos_pll_out=>cos_pll_out, --cos_out_sc,--
+			minus_sin_pll_out=>minus_sin_pll_out,--minus_sin_pll_out,
+			minus_cos_pll_out=>minus_cos_pll_out,--minus_sin_pll_out,
+
+			vq_debug=>open, --vq_debug,
+			end_signal=>end_signal_pll
+);
+
+
+matrix_times_vector_debug: matrix_vector_multiplication_v2 
+port map(clk=>clk,
+			rst=>rst,
+			start=>start_mv,
+			matrix1_in=>matrix1_in,
+			vector_in=>vector_in,
+			vector_out=>vector_out,
+			
+			mult_in_a_next=>mult_in_a_next_mv,
+			mult_in_b_next=>mult_in_b_next_mv,
+			acc_in_a_next=>acc_in_a_next_mv,
+			acc_in_b_next=>acc_in_b_next_mv,
+			mult_out_reg=>mult_out_reg_mv,
+			acc_out_reg=>acc_out_reg_mv,
+			mult_in_a_reg=>mult_in_a_reg_mv,
+			mult_in_b_reg=>mult_in_b_reg_mv,
+			acc_in_a_reg=>acc_in_a_reg_mv,
+			acc_in_b_reg=>acc_in_b_reg_mv,
+			load_mult=>load_mult_mv,
+			load_acc=>load_acc_mv,
+		
+			end_signal=>end_signal_mv
+);
+
+controllo_correnti: test_controllo_correnti_top 
+port map (clk=>clk,
+			rst=>rst,
+			start=>start_currents_control,
+			i_alpha_ref_in=>i_alpha_ref_reg,--to_sfixed(i_alpha_ref,REG_H,REG_L),--to_sfixed(i_alphabeta_ref(0), 7,-24), --i_alpha_ref_reg,
+			i_beta_ref_in =>i_beta_ref_reg,--to_sfixed(i_beta_ref,REG_H,REG_L),--to_sfixed(i_alphabeta_ref(1), 7,-24), --i_beta_ref_reg,
+			i_alpha_in =>i_alpha_reg,
+			i_beta_in =>i_beta_reg,
+			s_alpha_k_1_in =>s_alpha_opt_k_reg, -- resize(to_sfixed(s_alpha_k_1_in,7,-24),REG_H,REG_L), -- the same output of the block
+			s_beta_k_1_in =>s_beta_opt_k_reg, --resize(to_sfixed(s_beta_k_1_in,7,-24),REG_H,REG_L),-- the same output of the block
+			vg_alpha_in =>v_alpha_reg,
+			vg_beta_in =>v_beta_reg,
+			s_alpha_opt_out =>s_alpha_opt,
+			s_beta_opt_out =>s_beta_opt,
+			end_signal=>end_currents_control
+);
+
+
+		
+--u1: PI_ialphabeta_ref 
+--  port map( clk=>clk,
+--			  reset=>rst,
+--			  clk_enable=>en_pi,
+--			  v_ci=>v_ci,--( ((vc_1a),(vc_2a),(vc_3a),(vc_4a)), ((vc_1b),(vc_2b),(vc_3b),(vc_4b)), ((vc_1c),(vc_2c),(vc_3c),(vc_4c)) ) ,
+--			  iq_ref=>to_slv(resize(to_sfixed(iq_ref,1,-6),7,-24 )),
+--			  cos=>  to_slv(cos_pll_out), --attenzione posizione della virgola
+--			  sin=>  to_slv(sin_pll_out), --attenzione posizione della virgola
+--			  integral_error_in=>integrator_error_idq_reg,
+--			  ce_out=>open,
+--			  i_alpha_ref=>i_alpha_ref,
+--			  i_beta_ref=>i_beta_ref,
+--			  integral_error_out=>integral_error_idq_signal
+--);
+
+
+PI_ID_REF: pi_id_ref_top 
+port map(clk=>clk,
+			rst=>rst,
+			start=>start_pi,
+			vc_i=>vc_i_sfix,
+			id_ref=>id_ref,
+			vdc_out=>vdc_out,
+			vc_a_out=>vc_a_out,
+			vc_b_out=>vc_b_out,
+			vc_c_out=>vc_c_out,
+		
+			mult_in_a_next=>mult_in_a_next_pi,
+			mult_in_b_next=>mult_in_b_next_pi,
+			acc_in_a_next=>acc_in_a_next_pi,
+			acc_in_b_next=>acc_in_b_next_pi,
+			mult_out_reg=>mult_out_reg_pi,
+			acc_out_reg=>acc_out_reg_pi,
+			mult_in_a_reg=>mult_in_a_reg_pi,
+			mult_in_b_reg=>mult_in_b_reg_pi,
+			acc_in_a_reg=>acc_in_a_reg_pi,
+			acc_in_b_reg=>acc_in_b_reg_pi,
+			load_mult=>load_mult_pi,
+			load_acc=>load_acc_pi,
+			
+			end_signal=>end_signal_pi
+);
+
+filter_DC_currents: low_pass_filter 
+port map(clk=>clk,
+			rst=>rst,
+			start=>start_lpf,
+			signal_in=>(i_ia_sfix,i_ib_sfix,i_ic_sfix),
+			signal_out=>signal_filtered,
+
+			
+			mult_in_a_next=>mult_in_a_next_lpf,
+			mult_in_b_next=>mult_in_b_next_lpf,
+			acc_in_a_next=>acc_in_a_next_lpf,
+			acc_in_b_next=>acc_in_b_next_lpf,
+			mult_out_reg=>mult_out_reg_lpf,
+			acc_out_reg=>acc_out_reg_lpf,
+			mult_in_a_reg=>mult_in_a_reg_lpf,
+			mult_in_b_reg=>mult_in_b_reg_lpf,
+			acc_in_a_reg=>acc_in_a_reg_lpf,
+			acc_in_b_reg=>acc_in_b_reg_lpf,
+			load_mult=>load_mult_lpf,
+			load_acc=>load_acc_lpf,
+			
+			end_signal=>end_signal_lpf
+		);
+
+
+--U2: alphabeta2abc 
+--  port map( clk=>clk,
+--			  reset=>rst,
+--			  clk_enable=>en_cluster_balancing,
+--			  Salphabeta=>Salphabeta,--( to_slv(s_alpha_opt) , to_slv(s_beta_opt)),          
+--			  ce_out=>open,
+--			  Sa=>Sa_cb,
+--			  Sb=>Sb_cb,
+--			  Sc=>Sc_cb
+--);
+
+--u3: test_HDL_costs_cap 
+--  port map( clk=>clk,
+--				reset=>rst,
+--				clk_enable=>en_individual_balancing,
+--				vc_i=>v_ci,--( ((vc_1a),(vc_2a),(vc_3a),(vc_4a)),((vc_1b),(vc_2b),(vc_3b),(vc_4b)), ((vc_1c),(vc_2c),(vc_3c),(vc_4c)) ),
+--				Sabc=> Sa_slv,
+--				iabc=> ia_slv,
+--				s_i=> s_i_reg,
+--				iabc_pred=> iabc_pred,          
+--				ce_out=>open,
+--				S_i_1=> s_i_signal
+--);
+--Sa_slv<=( to_slv(resize(to_sfixed(Sa_cb,7,-24), 3,0)), 
+--						 to_slv(resize(to_sfixed(Sb_cb,7,-24), 3,0)),  
+--						 to_slv(resize(to_sfixed(Sc_cb,7,-24), 3,0)) );--                               :   IN    vector_of_std_logic_vector4(0 TO 2);  -- sfix4 [3]
+--ia_slv<=(to_slv(i_ia_norm_reg), to_slv(i_ib_norm_reg), to_slv(i_ic_norm_reg) );--                                :   IN    vector_of_std_logic_vector32(0 TO 2);  -- sfix32_En24 [3]
+
+IB: individual_balancing
+port map(clk=>clk,
+			rst=>rst,
+			start=>start_ib,
+			vc_i=>vc_i_sfix,
+			S_abc => S_abc_ib,
+			i_abc => i_abc_ib,
+			i_pred_abc => iabc_pred,--(to_sfixed(ia_pred_in,REG_H,REG_L) , to_sfixed(ib_pred_in,REG_H,REG_L), to_sfixed(ic_pred_in,REG_H,REG_L)), --,
+			S_k_1_abc => s_i_reg,--S_k_sfix,--( to_sfixed(S_k_1_1a,1,0), to_sfixed(S_k_1_2a,1,0), to_sfixed(S_k_1_3a,1,0), to_sfixed(S_k_1_4a,1,0), 
+							--	to_sfixed(S_k_1_1b,1,0), to_sfixed(S_k_1_2b,1,0), to_sfixed(S_k_1_3b,1,0), to_sfixed(S_k_1_4b,1,0), 
+							--	to_sfixed(S_k_1_1c,1,0), to_sfixed(S_k_1_2c,1,0), to_sfixed(S_k_1_3c,1,0), to_sfixed(S_k_1_4c,1,0) ),
+			S_k_1_abc_out => s_i_signal,--S_k_sfix,
+			indeces_a_out =>open,--indeces_a_out, -- TEST IB A
+			costs_a_out => open,--costs_a_out,  -- TEST IB A
+			S_out_a=> S_out_a,
+			S_out_b=> S_out_b,
+			S_out_c=> S_out_c,
+			end_signal=> end_signal_ib
+);
+
+
+
+--Currents_pred: currents_predictions 
+--  port map(clk=>clk,
+--				reset=>rst,
+--				clk_enable=>en_i_pred,
+--				ia=>    to_slv(i_ia_norm_reg),
+--				ib=>    to_slv(i_ib_norm_reg),
+--				ic=>    to_slv(i_ic_norm_reg),
+--				vg_a=> to_slv(i_va_norm_reg),
+--				vg_b=> to_slv(i_vb_norm_reg),
+--				vg_c=> to_slv(i_vc_norm_reg),
+--				Sa=> Sa_opt_slv ,-- input tempo precedente                             :   IN    vector_of_std_logic_vector4(0 TO 2);  -- sfix4 [3]
+--				Sb=> Sb_opt_slv ,-- input tempo precedente                             :   IN    vector_of_std_logic_vector4(0 TO 2);  -- sfix4 [3]
+--				Sc=> Sc_opt_slv,-- input tempo precedente                             :   IN    vector_of_std_logic_vector4(0 TO 2);  -- sfix4 [3]
+--				ce_out=>open,
+--				iabc_pred=> iabc_pred
+--);
+
+Currents_pred: i_pred 
+port map(clk=>clk,
+			rst=>rst,
+			start=>start_pred,
+			iabc=> iabc, --( i_ia_norm_reg, i_ib_norm_reg, i_ic_norm_reg),
+			vg_abc => vg_abc, --( i_va_norm_reg, i_vb_norm_reg, i_vc_norm_reg),
+			sabc =>sabc, -- ( resize(Sa_cb_reg,SABC_H,SABC_L), resize(Sb_cb_reg,SABC_H,SABC_L), resize(Sc_cb_reg,SABC_H,SABC_L) ),
+			iabc_pred =>iabc_pred,
+			
+			mult_in_a_next=>mult_in_a_next_pred,
+			mult_in_b_next=>mult_in_b_next_pred,
+			acc_in_a_next=>acc_in_a_next_pred,
+			acc_in_b_next=>acc_in_b_next_pred,
+			mult_out_reg=>mult_out_reg_pred,
+			acc_out_reg=>acc_out_reg_pred,
+			mult_in_a_reg=>mult_in_a_reg_pred,
+			mult_in_b_reg=>mult_in_b_reg_pred,
+			acc_in_a_reg=>acc_in_a_reg_pred,
+			acc_in_b_reg=>acc_in_b_reg_pred,
+			load_mult=>load_mult_pred,
+			load_acc=>load_acc_pred,
+			
+			end_signal=>end_signal_pred
+);
+
+	
+deadband_implementation: deadband_module 
+generic map(DEADBAND=>DEADBAND,
+				N=>N
+)
+port map(clk =>clk,
+			rst =>rst,
+			switching_in =>switching_register,-- to be conected to the nios register that control the switching signals: to be written at the beginning of TS
+			switching_db_out =>switching_db_out -- output of the controller
+);
+
+CB: cluster_balancing_top 
+port map(clk=>clk,
+			rst=>rst,
+			start=> start_cb,
+	
+			iabc_in =>iabc, 
+			iabc_pred_in =>iabc_pred,
+			vc_abc_in => vc_abc_in , --(vc_a_out,vc_b_out,vc_c_out),
+			Sabc_in =>s_abc_opt_reg,
+			
+			s_alpha_opt_in =>s_alpha_opt,--resize(to_sfixed(s_alpha_k_1_in,7,-24),REG_H,REG_L),  --,
+			s_beta_opt_in =>s_beta_opt,--resize(to_sfixed(s_beta_k_1_in,7,-24),REG_H,REG_L), --,	
+			Sa_cb_out => open,--sa_cb,--sa_cb_out,
+			Sb_cb_out => open,--sb_cb,--sb_cb_out,
+			Sc_cb_out => open,--sc_cb,--sc_cb_out,
+			
+			sa0_out => sa_cb,--sa_0_out
+			sb0_out => sb_cb,--sb_0_out, --
+			sc0_out => sc_cb,--sc_0_out, --
+			
+--			w_0_cb_in=>resize(to_sfixed(w_0_cb_nios,1, -14 ), REG_H,REG_L),
+			
+			end_signal=> end_signal_cb
+);
+
+
+protection:  voltages_currents_protection 
+port map(clk=>clk,
+			rst=>rst,
+			iabc_in =>iabc,
+			vc => vc_i_sfix,
+			overcurrent_a=>open,
+			overcurrent_b=>open,
+			overcurrent_c=>open,
+			overcurrent=>overcurrent,
+			unbalance_v=> unbalance_v
+);
+
+counter_pll_expired: down_counter_1_time 
+port map(clk=>clk,
+			rst=>rst,
+			start=>start_pll_nios,
+			period_in=> period_to_wait_pll,
+			count_out =>open,
+			end_count_out => end_period_pll
+);
+
+
+
+
+---------------------------------------------------------------- ALU declaration
+process(mult_in_a_reg, mult_in_b_reg, acc_in_a_reg, acc_in_b_reg, load_mult, load_acc, mult_out_signal, acc_out_signal, mult_out_reg, acc_out_reg)
+begin
+	for i in mult_in_a_reg'low to mult_in_a_reg'high loop
+		mult_out_signal(i)<= resize(mult_in_a_reg(i) * mult_in_b_reg(i),mult_in_a_reg(i));
+	
+		if load_mult(i)='1' then
+			mult_out_next(i)<=mult_out_signal(i);
+		else
+			mult_out_next(i)<=mult_out_reg(i);
+		end if;
+	end loop;
+	
+	
+	for i in acc_in_a_reg'low to acc_in_a_reg'high loop
+		acc_out_signal(i)<= resize(acc_in_a_reg(i) + acc_in_b_reg(i), acc_in_a_reg(i));
+	
+		if load_acc(i)='1' then
+			acc_out_next(i)<=acc_out_signal(i);
+		else
+			acc_out_next(i)<=acc_out_reg(i);
+		end if;
+	end loop;
+end process;
+
+mult_out_reg_mv<=mult_out_reg;
+acc_out_reg_mv<=acc_out_reg;
+
+mult_out_reg_pi<=mult_out_reg;
+acc_out_reg_pi<=acc_out_reg;
+
+mult_out_reg_pred<=mult_out_reg;
+acc_out_reg_pred<=acc_out_reg;
+
+mult_out_reg_lpf<=mult_out_reg;
+acc_out_reg_lpf<=acc_out_reg;
+--i_theta_sc<=i_wt_pll;
+
+
+
+
+i_voltage_grid_a<=grid_rx_a(13 downto 2);-- & "0000";
+
+i_voltage_grid_b<=grid_rx_b(13 downto 2);-- & "0000";
+
+i_voltage_grid_c<=grid_rx_c(13 downto 2);-- & "0000";
+
+i_va_sfix<=resize(to_sfixed(i_voltage_grid_a,1+2, -10+2 ), i_va_sfix);--INVERTITO B E C!!  a>b>c
+i_vb_sfix<=resize(to_sfixed(i_voltage_grid_b,1+2, -10+2 ), i_vb_sfix);
+i_vc_sfix<=resize(to_sfixed(i_voltage_grid_c,1+2, -10+2), i_vc_sfix);
+
+i_ia_sfix<=resize(to_sfixed(i_current_grid_a,1+2+3+3, -10+2+3 ), i_ia_sfix);--INVERTITO B E C!!  a>b>c
+i_ib_sfix<=resize(to_sfixed(i_current_grid_b,1+2+3+3, -10+2+3 ), i_ib_sfix);
+i_ic_sfix<=resize(to_sfixed(i_current_grid_c,1+2+3+3, -10+2+3), i_ic_sfix);
+
+
+
+
+
+--va_debug<= to_slv( resize(i_va_norm_reg,0,-7 ) )  & to_slv( resize(v_a_reg,0,-7 ) ) ;--     to_slv( resize(v_c_reg,1, -6) )  ; --to_slv( resize(v_a_reg,4, -11) ); --i_voltage_grid_a(11 downto 4) & "00000000"; 
+--vb_debug<=to_slv( resize(v_b_reg,0, -14) );
+--vc_debug<=to_slv( resize(v_c_reg,0, -14) );
+
+--clk_out<=clk;
+start_control_signal_out<= start_pll_nios;
+
+
+--i_alpha_ref<=to_sfixed(i_alphabeta_ref(0), 7,-24); --i_alpha_ref_reg,
+--i_beta_ref<=to_sfixed(i_alphabeta_ref(1), 7,-24); --i_alpha_ref_reg,
+
+--v_ci<=( vc_a1, vc_a2, vc_a3, vc_a4, vc_b1, vc_b2, vc_b3, vc_b4, vc_c1, vc_c2, vc_c3, vc_c4 );
+--v_ci(0)<=vc_a1;
+--v_ci(1)<=vc_a2;
+--v_ci(2)<=vc_a3;
+--v_ci(3)<=vc_a4;
+--v_ci(4)<=vc_b1;
+--v_ci(5)<=vc_b2;
+--v_ci(6)<=vc_b3;
+--v_ci(7)<=vc_b4;
+--v_ci(8)<=vc_c1;
+--v_ci(9)<=vc_c2;
+--v_ci(10)<=vc_c3;
+--v_ci(11)<=vc_c4;
+
+--v_ci<=(vc_a1, vc_a2, vc_a3, vc_a4, vc_b1, vc_b2, vc_b3, vc_b4, vc_c1, vc_c2, vc_c3, vc_c4);
+--vc_i_sfix<=( vc_1a_reg, vc_2a_reg, vc_3a_reg, vc_4a_reg,
+--				vc_1b_reg, vc_2b_reg, vc_3b_reg, vc_4b_reg,
+--				vc_1c_reg, vc_2c_reg, vc_3c_reg, vc_4c_reg );
+vc_i_sfix<=vc_ip_reg;
+
+--s_i_out<=s_i_reg; -- da aggiungere la dead band!
+
+--vc_a1<=to_slv(resize(to_sfixed(pio_vc_a1,-1,-16),7,-24)); --pio_vc_a1 is in [Vdc_max/Vbase,0], I consider 0 integer part and no sign part: 16 bit of decimal part
+--vc_a2<=to_slv(resize(to_sfixed(pio_vc_a2,-1,-16),7,-24));
+--vc_b1<=to_slv(resize(to_sfixed(pio_vc_b1,-1,-16),7,-24));
+--vc_b2<=to_slv(resize(to_sfixed(pio_vc_b2,-1,-16),7,-24));
+--vc_c1<=to_slv(resize(to_sfixed(pio_vc_c1,-1,-16),7,-24)); 
+--vc_c2<=to_slv(resize(to_sfixed(pio_vc_c2,-1,-16),7,-24));
+
+
+
+
+--i_alpha_ref_in_sfixed<=to_sfixed(i_alpha_ref,REG_H,REG_L);--to_sfixed(i_alphabeta_ref(0), 7,-24), --i_alpha_ref_reg,
+--i_beta_ref_in_sfixed<=to_sfixed(i_beta_ref,REG_H,REG_L);--to_sfixed(i_alphabeta_ref(0), 7,-24), --i_alpha_ref_reg,
+
+iq_ref_sfix<=resize(to_sfixed(iq_ref,1,-6), iq_ref_sfix);
+
+				
+--Sa_cb<=to_slv(Sa_cb_reg);	
+--Sb_cb<=to_slv(Sb_cb_reg);	
+--Sc_cb<=to_slv(Sc_cb_reg);	
+		
+--Sa_opt_slv<=to_slv(resize(to_sfixed(s_abc_opt_reg(0),7,-24), 3,0));
+--Sb_opt_slv<=to_slv(resize(to_sfixed(s_abc_opt_reg(1),7,-24), 3,0));
+--Sc_opt_slv<=to_slv(resize(to_sfixed(s_abc_opt_reg(2),7,-24), 3,0));
+
+--S_abc_ib<=( resize(Sa_cb_reg,SABC_H,SABC_L) , resize(Sb_cb_reg,SABC_H,SABC_L), resize(Sc_cb_reg,SABC_H,SABC_L));
+S_abc_ib<=( resize(Sa_cb,SABC_H,SABC_L), resize(Sb_cb,SABC_H,SABC_L) , resize(Sc_cb,SABC_H,SABC_L) ); --( Sa_cb_reg, Sb_cb_reg, Sc_cb_reg);
+i_abc_ib<= (i_ia_norm_reg,i_ib_norm_reg,i_ic_norm_reg);
+--i_pred_abc_ib <= iabc_pred;
+
+vc_1a_sfix<=resize(to_sfixed(pio_vc_a1,4, -10), vc_1a_sfix);
+vc_2a_sfix<=resize(to_sfixed(pio_vc_a2,4, -10), vc_1a_sfix);
+vc_1b_sfix<=resize(to_sfixed(pio_vc_b1,4, -10), vc_1a_sfix);
+vc_2b_sfix<=resize(to_sfixed(pio_vc_b2,4, -10), vc_1a_sfix);
+vc_1c_sfix<=resize(to_sfixed(pio_vc_c1,4, -10), vc_1a_sfix);
+vc_2c_sfix<=resize(to_sfixed(pio_vc_c2,4, -10), vc_1a_sfix);
+
+
+output_ib<= ( S_out_a(0) & S_out_a(1) & S_out_b(0) & S_out_b(1) & S_out_c(0) & S_out_c(1)  );
+
+
+--wt_out<=to_slv(resize(i_wt_pll,7,-24));
+
+--id_ref_out<=to_slv(resize(id_ref,7,-24));
+--
+--s_alpha_opt_out<=to_slv(resize(s_alpha_opt,7,-24));
+--s_beta_opt_out<=to_slv(resize(s_beta_opt,7,-24));
+
+--vc_1a_sfix_out<= to_slv(vc_1a_sfix);
+--vc_1a_out<=to_slv(vdc_out);
+
+iabc<= ( i_ia_norm_reg, i_ib_norm_reg, i_ic_norm_reg);
+vg_abc <= ( i_va_norm_reg, i_vb_norm_reg, i_vc_norm_reg);
+sabc <= S_abc_ib;--( resize(Sa_cb_reg,SABC_H,SABC_L), resize(Sb_cb_reg,SABC_H,SABC_L), resize(Sc_cb_reg,SABC_H,SABC_L) );
+
+
+--i_alpha_ref_out<=to_slv(resize(i_alpha_ref_reg,7,-24));			
+--i_beta_ref_out<=to_slv(resize(i_beta_ref_reg,7,-24));
+--i_alpha_out <=to_slv(resize(i_alpha_reg,7,-24));
+--i_beta_out<=to_slv(resize(i_beta_reg,7,-24));
+--s_alpha_k_1_out<=to_slv(resize(s_alpha_opt_k_reg,7,-24)); 
+--s_beta_k_1_out<=to_slv(resize(s_beta_opt_k_reg,7,-24)); 
+--vg_alpha_out<=to_slv(resize(v_alpha_reg,7,-24));
+--vg_beta_out<=to_slv(resize(v_beta_reg,7,-24));
+--			
+			
+--indeces_1a<=std_logic_vector(resize(s_abc_opt_reg(0),7,-24)); -- std_logic_vector(to_unsigned(indeces_a_out(0), indeces_1a'length));
+--indeces_2a<=std_logic_vector(resize(s_abc_opt_reg(1),7,-24)); -- std_logic_vector(to_unsigned(indeces_a_out(1), indeces_1a'length));
+--indeces_3a<=std_logic_vector(resize(s_abc_opt_reg(2),7,-24)); -- std_logic_vector(to_unsigned(indeces_a_out(2), indeces_1a'length));
+--indeces_4a<=std_logic_vector(to_unsigned(indeces_a_out(3), indeces_1a'length));
+
+--cost_1a<=to_slv(resize(costs_a_out(0),7,-24)); 
+--cost_2a<=to_slv(resize(costs_a_out(1),7,-24)); 
+--cost_3a<=to_slv(resize(costs_a_out(2),7,-24)); 
+--cost_4a<=to_slv(resize(costs_a_out(3),7,-24)); 
+
+
+
+			
+--vc_a1_ib_out<=to_slv(resize(vc_i_sfix(0), 7, -24));
+--vc_a2_ib_out<=to_slv(resize(vc_i_sfix(1), 7, -24));
+----vc_a3_ib_out<=to_slv(resize(vc_i_sfix(2), 7, -24));
+----vc_a4_ib_out<=to_slv(resize(vc_i_sfix(3), 7, -24));
+--S_a_ib_out <= to_slv(resize(S_abc_ib(0), 7, -24));
+--i_a_ib_out <= to_slv(resize(i_abc_ib(0), 7, -24));
+--i_pred_a_ib_out <= to_slv(resize(iabc_pred(0), 7, -24));--(to_sfixed(ia_pred_in,REG_H,REG_L) , to_sfixed(ib_pred_in,REG_H,REG_L), to_sfixed(ic_pred_in,REG_H,REG_L)), --,
+--S_k_1_a1_ib_out <= to_slv(resize(s_i_reg(0), 7, -24));
+--S_k_1_a2_ib_out <= to_slv(resize(s_i_reg(1), 7, -24));
+--S_k_1_a3_ib_out <= to_slv(resize(s_i_reg(2), 7, -24));
+--S_k_1_a4_ib_out <= to_slv(resize(s_i_reg(3), 7, -24));
+
+
+--i_wt_pll<=resize(to_sfixed(i_wt_pll_in,7,-24),i_wt_pll);
+			
+vc_abc_in <= (vc_a_out,vc_b_out,vc_c_out);
+
+
+protection_register<= (overcurrent, unbalance_v);
+overcurrent_out<=overcurrent;
+unbalance_v_out<=unbalance_v;
+
+P1_1H_U<=switching_db_out(23);
+P1_1L_U<=switching_db_out(22);
+P1_2L_U<=switching_db_out(21);
+P1_2H_U<=switching_db_out(20);
+
+P2_1H_U<=switching_db_out(19);
+P2_1L_U<=switching_db_out(18);
+P2_2L_U<=switching_db_out(17);
+P2_2H_U<=switching_db_out(16);
+
+P1_1H_V<=switching_db_out(15);
+P1_1L_V<=switching_db_out(14);
+P1_2L_V<=switching_db_out(13);
+P1_2H_V<=switching_db_out(12);
+
+P2_1H_V<=switching_db_out(11);
+P2_1L_V<=switching_db_out(10);
+P2_2L_V<=switching_db_out(9);
+P2_2H_V<=switching_db_out(8);
+
+P1_1H_W<=switching_db_out(7);
+P1_1L_W<=switching_db_out(6);
+P1_2L_W<=switching_db_out(5);
+P1_2H_W<=switching_db_out(4);
+
+P3_1H_W<=switching_db_out(3);
+P3_1L_W<=switching_db_out(2);
+P3_2L_W<=switching_db_out(1);
+P3_2H_W<=switching_db_out(0);
+
+end_signal_out<=end_signal;
+startup_signal_out<=end_period_pll;--startup_signal;
+
+rst<=not(reset_n);
+
+--vc_debug_out<=debug1_out(10 downto 0);
+
+--startup_signal_out<=end_period_pll;--startup_signal;
+
+--rst<=not(reset_n);
+
+vc_debug_out<=debug1_out(10 downto 0);
+
+--"0000"& start_spi & (start_pll) & (start_pi) & 
+	--			(start_currents_control) & start_cb & (start_ib ) & end_signal;
+			
+			
+--debug1_out(10 downto 0);
+--i_voltage_grid_a(11 downto 1)
+--pio_vc_i_a2(10 downto 0);--debug1_out(10 downto 0);
+--i_current_grid_a(5 downto 0) & i_current_grid_b(4 downto 0);
+--to_slv(resize(i_va_norm_reg,1,-3))  &	to_slv(resize(sin_pll_out,1,-4));
+--debug1_out(9 downto 5) & debug2_out(9 downto 4);
+--to_slv(resize(i_vb_norm_reg,1,-3))  &	to_slv(resize(i_ib_norm_reg,1,-4));
+--to_slv(resize(i_ia_norm_reg,0,-3)) & to_slv(resize(i_ib_norm_reg,0,-2)) & to_slv(resize(i_ic_norm_reg,0,-3));
+--debug1_out(10 downto 0);--i_voltage_grid_c(9 downto 5) & i_current_grid_c(9 downto 4);
+ --debug1_out(15 downto 5);-- & switching_db_out(3 DOWNTO 0); 
+--to_slv(resize(i_va_norm_reg,1,-3))  &	to_slv(resize(sin_pll_out,1,-4)) cb 			;--sin_pll_out pio_vc_c2(9 downto 6); --minus_sin_pll_out
+--to_slv(resize(i_vb_norm_reg,1,-3))  &	to_slv(resize(i_ib_norm_reg,1,-4))  		;
+--debug1_out(15 downto 5);  --10 downto 0 for capacitor voltages ... 15 downto 5 for currents
+
+debug1_slv<= "00000" & to_slv(resize(i_vb_norm_reg,1,-3))  &	to_slv(resize(i_vc_norm_reg,1,-4));--"00000" &  vc_b2_reg(10 downto 0);--to_slv(resize(vc_ip_reg(0),1,-9)); --to_slv(resize(i_ia_norm_reg,1,-9)) ;--"00000" &  to_slv(resize(vc_ip_reg(0),1,-9)); --"00000" & to_slv(resize(i_ia_norm_reg,1,-9)) ;--'0' & pio_vc_a1;--pio_vc_i_a2(31 downto 16);--'0' & i_current_grid_a; -- pio_vc_a1 ;--to_slv(resize(vc_ip_reg(0),1,-14)); --to_slv(resize(i_ia_sfix,1,-14)); --
+debug2_slv<= "00000" &  to_slv(resize(i_ia_norm_reg,1,-7)) & timer_control_pulse & end_signal ; --to_slv(resize(vc_ip_reg(1),1,-9)); --to_slv(resize(i_ib_norm_reg,1,-9)) ;--"00000" &  to_slv(resize(vc_ip_reg(1),1,-9)); --"00000" & to_slv(resize(i_ib_norm_reg,1,-9)) ;--'0' & pio_vc_b1;--pio_vc_i_b2(31 downto 16);--'0' & i_current_grid_b; --pio_vc_a2 ;--to_slv(resize(vc_ip_reg(1),1,-14)); --i_current_grid_b & "0000";--i_current_grid_b & "0000"; --to_slv(resize(i_ib_sfix,1,-14)); -- to_slv(resize(vc_ip_reg(1),1,-14));
+debug3_slv<= "00000" &  to_slv(resize(vc_ip_reg(0),1,-9)); --to_slv(resize(i_ic_norm_reg,1,-9)) ;--"00000" &  to_slv(resize(vc_ip_reg(2),1,-9)); --"00000" & to_slv(resize(i_ic_norm_reg,1,-9)) ;--'0' & pio_vc_c1;--pio_vc_i_c2(31 downto 16);--'0' & i_current_grid_c; --pio_vc_b1 ;--to_slv(resize(vc_ip_reg(2),1,-14)); --i_current_grid_c & "0000"; --to_slv(resize(i_ic_sfix,1,-14)); -- to_slv(resize(vc_ip_reg(2),1,-14));
+debug4_slv<= "00000" &  to_slv(resize(vc_ip_reg(1),1,-9)); --i_current_grid_a(10 downto 0);--"00000" &  to_slv(resize(vc_ip_reg(3),1,-9)); --'0' & pio_vc_a2;--pio_vc_i_a2(15 downto 0);--"00000" & to_slv(signal_filtered(0)(1 downto -9));--'0' & pio_vc_a1;--to_slv(resize(i_ia_norm_reg,1,-14));--pio_vc_a2;--to_slv(resize(i_va_norm_reg,1,-14)); --pio_vc_b2 ;--to_slv(resize(vc_ip_reg(3),1,-14)); - to_slv(resize(vc_ip_reg(3),1,-14));
+debug5_slv<= "00000" &  to_slv(resize(vc_ip_reg(2),1,-9)); --i_current_grid_b(10 downto 0);--"00000" &  to_slv(resize(vc_ip_reg(4),1,-9)); --"00000" & pio_vc_i_a1(15) & pio_vc_i_a2(31) & pio_vc_i_a2(15) & pio_vc_i_b1(31) & pio_vc_i_b1(15) & pio_vc_i_b2(31) & pio_vc_i_b2(15) & pio_vc_i_c1(31) & pio_vc_i_c1(15) & pio_vc_i_c2(31) & pio_vc_i_c2(15) ;--'0' & pio_vc_b2;--pio_vc_i_b2(15 downto 0);--"00000" & to_slv(signal_filtered(1)(1 downto -9));--'0' & pio_vc_b1;--to_slv(resize(i_ib_norm_reg,1,-14));--pio_vc_b2;--to_slv(resize(i_vb_norm_reg,1,-14)); --pio_vc_c1 ;--to_slv(resize(vc_ip_reg(4),1,-14));  -- to_slv(resize(vc_ip_reg(4),1,-14));
+debug6_slv<= "00000" &  to_slv(resize(vc_ip_reg(3),1,-9)); --i_current_grid_c(10 downto 0);--"00000" &  to_slv(resize(vc_ip_reg(5),1,-9)); --"00000" &  i_current_grid_a(11 DOWNTO 6) & i_current_grid_a_CT(11 downto 7);--'0' & i_current_grid_c;--'0' & pio_vc_a2;-- "00000" & to_slv(signal_filtered(2)(1 downto -9));--'0' & pio_vc_c1;--"00000" & to_slv(resize(i_va_norm_reg,1,-3))  &	to_slv(resize(sin_pll_out,1,-4));--'0' & pio_vc_c2;--to_slv(resize(i_ic_norm_reg,1,-14));--pio_vc_c2;--to_slv(resize(i_vc_norm_reg,1,-14)); --pio_vc_c2 ;--to_slv(resize(vc_ip_reg(5),1,-14)); --to_slv(resize(i_ic_norm_reg,1,-14)); -- to_slv(resize(vc_ip_reg(5),1,-14));
+debug7_slv<= "00000" &  to_slv(resize(vc_ip_reg(4),1,-9)); --"00000" & to_slv(resize(i_ia_norm_reg,1,-3)) &  to_slv(resize(i_ia_norm_reg_test,1,-4)) ;--"00000" & to_slv(resize(i_ia_norm_reg,1,-2)) & to_slv(resize(i_ib_norm_reg,1,-2)) & to_slv(resize(i_ic_norm_reg,1,-1)) ;--"00000" &  i_current_grid_b(11 DOWNTO 6) & i_current_grid_b_CT(11 downto 7);--'0' & pio_vc_b2;
+debug8_slv<= "00000" &  to_slv(resize(vc_ip_reg(5),1,-9)); --"00000" & to_slv(resize(i_ib_norm_reg,1,-3)) &  to_slv(resize(i_ib_norm_reg_test,1,-4)) ;--pio_vc_i_c1(15 downto 0); --"00000" &  i_current_grid_c(11 DOWNTO 6) & i_current_grid_c_CT(11 downto 7);--'0' & pio_vc_c2;
+debug9_slv<= "00000" &  to_slv(resize(i_ib_norm_reg,1,-7)) & timer_control_pulse & end_signal ; --"00000" & to_slv(resize(i_ic_norm_reg,1,-3)) &  to_slv(resize(i_ic_norm_reg_test,1,-4)) ;--"00000" & to_slv(resize(i_va_norm_reg,1,-2)) & to_slv(resize(i_vb_norm_reg,1,-2))  & to_slv(resize(i_vc_norm_reg,1,-1)) ; --"00000" & to_slv(i_ia_norm_reg(1 downto -2)) & to_slv(i_ib_norm_reg(1 downto -2)) & to_slv(i_ic_norm_reg(1 downto -1)) ;--'0' & pio_vc_c2;
+debug10_slv<="00000" &  to_slv(resize(i_ic_norm_reg,1,-7)) & timer_control_pulse & end_signal ; --"00000" & to_slv(resize(i_va_norm_reg,1,-3))  &	to_slv(resize(sin_pll_out,1,-4));  
+
+
+
+------ valutare se inserire registri
+----process(pio_vc_i_a1,pio_vc_i_b1,pio_vc_i_c1,pio_vc_i_a2,pio_vc_i_b2,pio_vc_i_c2)
+----begin
+----	
+----	if pio_vc_i_a1(31)='0' then  --the first 16 bits data is the voltage
+--		pio_vc_a1<= pio_vc_i_a1(30 downto 16);
+----	else
+----		pio_vc_a1<= pio_vc_i_a1(14 downto 0);
+----	end if;
+--	
+----	if pio_vc_i_a2(31)='0' then  --the first 16 bits data is the voltage
+--		pio_vc_a2<= pio_vc_i_a2(30 downto 16);
+--		i_current_grid_a<= pio_vc_i_a2(14 downto 0);
+----	else
+----		pio_vc_a2<= pio_vc_i_a2(14 downto 0);
+----		i_current_grid_a<= pio_vc_i_a2(30 downto 16);		
+----	end if;
+--		
+----	if pio_vc_i_b1(31)='0' then  --the first 16 bits data is the voltage
+--		pio_vc_b1<= pio_vc_i_b1(30 downto 16);
+----	else
+----		pio_vc_b1<= pio_vc_i_b1(14 downto 0);
+----	end if;
+--	
+----	if pio_vc_i_b2(31)='0' then  --the first 16 bits data is the voltage
+----		pio_vc_b2<= pio_vc_i_b2(30 downto 16);
+----	else
+----		i_current_grid_b<= pio_vc_i_b2(30 downto 16);		
+----	end if;	
+----	if pio_vc_i_b2(15)='0' then  
+----		pio_vc_b2<= pio_vc_i_b2(14 downto 0);
+----	else
+----		i_current_grid_b<= pio_vc_i_b2(14 downto 0);
+----	end if;
+----	if pio_vc_i_b2(31)='0' then  --the first 16 bits data is the voltage
+--		pio_vc_b2<= pio_vc_i_b2(30 downto 16);
+--		i_current_grid_b<= pio_vc_i_b2(14 downto 0);
+----	else
+----		pio_vc_b2<= pio_vc_i_b2(14 downto 0);
+----		i_current_grid_b<= pio_vc_i_b2(30 downto 16);		
+----	end if;
+--	
+----	if pio_vc_i_c1(31)='0' then  --the first 16 bits data is the voltage
+--		pio_vc_c1<= pio_vc_i_c1(30 downto 16);
+----	else
+----		pio_vc_c1<= pio_vc_i_c1(14 downto 0);
+----	end if;
+--	
+----	if pio_vc_i_c2(31)='0' then  --the first 16 bits data is the voltage
+--		pio_vc_c2<= pio_vc_i_c2(30 downto 16);
+--		i_current_grid_c<= pio_vc_i_c2(14 downto 0);
+----	else
+----		pio_vc_c2<= pio_vc_i_c2(14 downto 0);
+----		i_current_grid_c<= pio_vc_i_c2(30 downto 16);		
+----	end if;	
+----end process;
+
+i_current_grid_a_CT<=grid_rx_a(29 downto 18);
+i_current_grid_b_CT<=grid_rx_b(29 downto 18);
+i_current_grid_c_CT<=grid_rx_c(29 downto 18);
+
+i_ia_sfix_CT<=resize(to_sfixed(i_current_grid_a_CT,1+5, -10+5 ), i_ia_sfix_CT);--INVERTITO B E C!!  a>b>c
+i_ib_sfix_CT<=resize(to_sfixed(i_current_grid_b_CT,1+5, -10+5 ), i_ib_sfix_CT);
+i_ic_sfix_CT<=resize(to_sfixed(i_current_grid_c_CT,1+5, -10+5), i_ic_sfix_CT);
+
+
+
+------ TEST SPITX GRID ON THE SAME CHANNEL
+--spi_grid_MOSI_a<=spi_grid_MOSI_abc;
+--spi_grid_SCK_a<=spi_grid_SCK_abc;
+--spi_grid_SS_n_a<=spi_grid_SS_n_abc;
+--
+--spi_grid_MOSI_b<=spi_grid_MOSI_abc;
+--spi_grid_SCK_b<=spi_grid_SCK_abc;
+--spi_grid_SS_n_b<=spi_grid_SS_n_abc;
+--
+--spi_grid_MOSI_c<=spi_grid_MOSI_abc;
+--spi_grid_SCK_c<=spi_grid_SCK_abc;
+--spi_grid_SS_n_c<=spi_grid_SS_n_abc;
+delay_spi_int<=to_integer(unsigned(delay_spi));
+
+spi_modules_generate_grid: for spi_grid_i in 0 to 2 generate
+
+	spi_master_module_grid_i:spi_master_module
+	generic map(
+					CLK_DIV =>3, -- the clk frequency will be divided by 2*CLK_DIV
+					cpol =>'1', --clk polarity
+					cpha =>'0',  --clk phase
+					WORD => 32
+	)
+	port map(clk =>clk,
+				reset =>rst,
+				start=>start_spi,
+				data_tx_in =>"10001110000000000000000000000000",  
+				DELAY_CONSTANT =>delay_spi_int, --12 = 600ns
+
+				data_rx_out => data_grid_rx_array(spi_grid_i),
+				spi_miso_in=> spi_grid_miso_in_array(spi_grid_i),
+				spi_mosi_out=> spi_grid_mosi_out_array(spi_grid_i),
+				spi_cs_out=> spi_grid_cs_out_array(spi_grid_i),
+				spi_clk_out=> spi_grid_clk_out_array(spi_grid_i),
+				end_signal=>end_signal_spi_grid_array(spi_grid_i)
+	);
+end generate spi_modules_generate_grid;
+
+
+
+spi_modules_generate_dsp: for spi_dsp_i in 0 to 3*N-1 generate
+	spi_master_module_dsp_i:spi_master_module
+	generic map(
+					CLK_DIV =>3, -- the clk frequency will be divided by 2*CLK_DIV
+					cpol =>'0', --clk polarity
+					cpha =>'0',  --clk phase
+					WORD => 16
+	)
+	port map(clk =>clk,
+				reset =>rst,
+				start=>spi_dsp_start_array(spi_dsp_i),--start_spi_dsp,--start_spi,
+				data_tx_in =>spi_dsp_tx_data,
+				DELAY_CONSTANT =>delay_spi_int, --12 clk cycles = 600ns
+
+				data_rx_out => data_dsp_rx_array(spi_dsp_i),
+				spi_miso_in=> spi_dsp_miso_in_array(spi_dsp_i),
+				spi_mosi_out=> spi_dsp_mosi_out_array(spi_dsp_i),
+				spi_cs_out=> spi_dsp_cs_out_array(spi_dsp_i),
+				spi_clk_out=> spi_dsp_clk_out_array(spi_dsp_i),
+				end_signal=>end_signal_spi_dsp_array(spi_dsp_i)
+	);
+end generate spi_modules_generate_dsp;
+
+--end_signal_spi<= '1' when end_signal_spi_array=(others=>'1') and end_signal_spi_dsp_2rx='1' else
+--					  '0';
+end_signal_spi<= end_signal_spi_dsp_2rx;
+
+end_signal_spi_dsp<= end_signal_spi_dsp_array(0) and end_signal_spi_dsp_array(1) and end_signal_spi_dsp_array(2) and end_signal_spi_dsp_array(3) and 
+							end_signal_spi_dsp_array(4) and end_signal_spi_dsp_array(5) ;
+					  
+spi_16_process: process(spi_state_reg, start_spi, end_signal_spi_dsp, data_dsp_rx_array, current_grid_a_reg, current_grid_b_reg, current_grid_c_reg,
+								vc_a1_reg, vc_a2_reg, vc_b1_reg, vc_b2_reg, vc_c1_reg, vc_c2_reg )
+begin
+start_spi_dsp<='0';
+vc_a1_next<=vc_a1_reg;
+vc_a2_next<=vc_a2_reg;
+vc_b1_next<=vc_b1_reg;
+vc_b2_next<=vc_b2_reg;
+vc_c1_next<=vc_c1_reg;
+vc_c2_next<=vc_c2_reg;
+current_grid_a_next<=current_grid_a_reg;
+current_grid_b_next<=current_grid_b_reg;
+current_grid_c_next<=current_grid_c_reg;		
+end_signal_spi_dsp_2rx<='0';
+spi_dsp_tx_data<=(others=>'0');-- --not relevant 
+
+	case spi_state_reg is
+		when spi_idle=>
+			if start_spi='1' then	
+				spi_state_next<=spi_rx_voltage;
+			else
+				spi_state_next<=spi_idle;
+			end if;
+			
+		when spi_rx_voltage =>
+			spi_dsp_tx_data<="1010101010101010"; --debug2_out;--
+			start_spi_dsp<='1';
+			if end_signal_spi_dsp='1' then
+				spi_state_next<=spi_store_voltage;
+			else	
+				spi_state_next<=spi_rx_voltage;
+			end if;
+		
+		when spi_store_voltage =>
+			vc_a1_next <= data_dsp_rx_array(0)(14 downto 0);
+			vc_a2_next <= data_dsp_rx_array(1)(14 downto 0);
+			vc_b1_next <= data_dsp_rx_array(2)(14 downto 0);
+			vc_b2_next <= data_dsp_rx_array(3)(14 downto 0);
+			vc_c1_next <= data_dsp_rx_array(4)(14 downto 0);
+			vc_c2_next <= data_dsp_rx_array(5)(14 downto 0);
+			
+			spi_state_next<=spi_rx_current;
+		
+		when spi_rx_current =>
+			spi_dsp_tx_data<=(others=>'0');
+			start_spi_dsp<='1';
+			if end_signal_spi_dsp='1' then
+				spi_state_next<=spi_store_current;
+			else	
+				spi_state_next<=spi_rx_current;
+			end if;
+		
+		when spi_store_current =>
+			current_grid_a_next <= data_dsp_rx_array(1)(14 downto 0);
+			current_grid_b_next <= data_dsp_rx_array(3)(14 downto 0);
+			current_grid_c_next <= data_dsp_rx_array(5)(14 downto 0);
+			
+			spi_state_next<=spi_end_state;
+			
+		when spi_end_state =>
+			end_signal_spi_dsp_2rx<='1';
+			if start_spi='1' then
+				spi_state_next<=spi_end_state;
+			else
+				spi_state_next<=spi_idle;
+			end if;
+	end case;
+end process;
+
+pio_vc_a1<=vc_a1_reg;
+pio_vc_a2<=vc_a2_reg;
+pio_vc_b1<=vc_b1_reg;
+pio_vc_b2<=vc_b2_reg;
+pio_vc_c1<=vc_c1_reg;
+pio_vc_c2<=vc_c2_reg;
+i_current_grid_a<=current_grid_a_reg;
+i_current_grid_b<=current_grid_b_reg;
+i_current_grid_c<=current_grid_c_reg;
+
+--end_signal_spi_array(0) and end_signal_spi_array(1) and end_signal_spi_array(2);
+grid_rx_a<=data_grid_rx_array(0);
+grid_rx_b<=data_grid_rx_array(1);
+grid_rx_c<=data_grid_rx_array(2);
+--pio_vc_i_a1<=data_spi_rx_array(3);
+--pio_vc_i_a2<=data_spi_rx_array(4);
+--pio_vc_i_b1<=data_spi_rx_array(5);
+--pio_vc_i_b2<=data_spi_rx_array(6);
+--pio_vc_i_c1<=data_spi_rx_array(7);
+--pio_vc_i_c2<=data_spi_rx_array(8);
+
+spi_grid_miso_in_array(0)<=spi_grid_MISO_a;
+spi_grid_miso_in_array(1)<=spi_grid_MISO_b;
+spi_grid_miso_in_array(2)<=spi_grid_MISO_c;
+
+spi_grid_MOSI_a<=spi_grid_mosi_out_array(0);
+spi_grid_MOSI_b<=spi_grid_mosi_out_array(1);
+spi_grid_MOSI_c<=spi_grid_mosi_out_array(2);
+
+spi_grid_SCK_a<=spi_grid_clk_out_array(0);
+spi_grid_SCK_b<=spi_grid_clk_out_array(1);
+spi_grid_SCK_c<=spi_grid_clk_out_array(2);
+
+spi_grid_SS_n_a<= not spi_grid_cs_out_array(0);
+spi_grid_SS_n_b<= not spi_grid_cs_out_array(1);
+spi_grid_SS_n_c<= not spi_grid_cs_out_array(2);
+
+
+spi_dsp_miso_in_array(0)<=spi_0_MISO;
+spi_dsp_miso_in_array(1)<=spi_1_MISO;
+spi_dsp_miso_in_array(2)<=spi_16_MISO;
+spi_dsp_miso_in_array(3)<=spi_17_MISO;
+spi_dsp_miso_in_array(4)<=spi_32_MISO;
+spi_dsp_miso_in_array(5)<=spi_34_MISO;
+
+spi_0_MOSI<=spi_dsp_mosi_out_array(0);
+spi_1_MOSI<=spi_dsp_mosi_out_array(1);
+spi_16_MOSI<=spi_dsp_mosi_out_array(2);
+spi_17_MOSI<=spi_dsp_mosi_out_array(3);
+spi_32_MOSI<=spi_dsp_mosi_out_array(4);
+spi_34_MOSI<=spi_dsp_mosi_out_array(5);
+
+spi_0_SCLK<=spi_dsp_clk_out_array(0);
+spi_1_SCLK<=spi_dsp_clk_out_array(1);
+spi_16_SCLK<=spi_dsp_clk_out_array(2);
+spi_17_SCLK<=spi_dsp_clk_out_array(3);
+spi_32_SCLK<=spi_dsp_clk_out_array(4);
+spi_34_SCLK<=spi_dsp_clk_out_array(5);
+
+spi_0_SS_n<=spi_dsp_cs_out_array(0);
+spi_1_SS_n<=spi_dsp_cs_out_array(1);
+spi_16_SS_n<=spi_dsp_cs_out_array(2);
+spi_17_SS_n<=spi_dsp_cs_out_array(3);
+spi_32_SS_n<=spi_dsp_cs_out_array(4);
+spi_34_SS_n<=spi_dsp_cs_out_array(5);
+
+
+spi_dsp_start_array(0)<=dsp_start0;
+spi_dsp_start_array(1)<=dsp_start0;
+spi_dsp_start_array(2)<=dsp_start0;
+spi_dsp_start_array(3)<=dsp_start0;
+spi_dsp_start_array(4)<=dsp_start0;
+spi_dsp_start_array(5)<=dsp_start0;
+
+dsp_start0<=start_spi_dsp;
+
+process(dsp_start0, counter_start_dsp_reg)
+begin
+	counter_start_dsp_next<=0;
+	dsp_start1<='0';
+	dsp_start2<='0';
+	if dsp_start0='1' then
+		counter_start_dsp_next<=counter_start_dsp_reg+1;
+	end if;
+		
+	if counter_start_dsp_reg>=31 then
+		dsp_start1<='1';
+	end if;
+	if counter_start_dsp_reg>=62 then
+		dsp_start2<='1';
+	end if;	
+end process;
+
+
+
+spi_clk_out_debug_out<= '1' when to_integer(unsigned(w_0_cb_nios))=0 else		
+								'0';
+
+--spi_dsp_cs_out_array(0);--spi_dsp_clk_out_array(0);--end_signal_spi_array(0);--spi_clk_out_array(0);
+spi_miso_in_debug_out<=spi_dsp_clk_out_array(0);--spi_dsp_miso_in_array(0);--end_signal_spi_array(2);--spi_miso_in_array(0);
+
+spi_cs_out_debug_out<=spi_dsp_cs_out_array(5);--spi_dsp_cs_out_array(0);--end_signal_spi_array(1);--spi_cs_out_array(0);
+spi_mosi_out_debug_out<=spi_dsp_clk_out_array(5);--end_signal_spi;--spi_mosi_out_array(0);
+
+
+---------------------------------------- cluster balancing enable, when w0_cb(MSB) is 0 cb is enabled
+--enable_cb<= '1' when to_integer(unsigned(w_0_cb_nios))=0 else		
+--								'0';
+----w_0_cb_nios(15);
+--sa_cb<=sa_cb_out when enable_cb='1' else
+--		 sa_0_out;
+--sb_cb<=sb_cb_out when enable_cb='1' else
+--		 sb_0_out;
+--sc_cb<=sc_cb_out when enable_cb='1' else
+--		 sc_0_out;
+		 
+		 
+--sa_cb<=sa_cb_out;--sa_0_out;
+--sb_cb<=sb_cb_out;--sb_0_out;
+--sc_cb<=sc_cb_out;--sc_0_out;
+		
+		 
+-- NOTE PER IL CB: 
+--1-controllare interrupt vs end_controllo, per capire se sto dentro i 50us (per tunare il delay SW)
+-- senza delay SW le correnti esplodono come se non ci fosse CB... con delay SW 9 l'offset è 1A... con delay SW 4 l'offset è 400mA (la tensione DC è 40V 
+-- come se il CB avesse una limitazione e non spingesse al massimo per compensare tutta la corrente DC con 80V come da vecchio test)
+-- scambio end_signal con v_debug[0] e interrupt_timer con v_debug[1] !!!
+--2- testare v_w con valori minori di 1
+
+end arch0;

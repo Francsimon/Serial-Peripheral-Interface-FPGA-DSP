@@ -1,0 +1,83 @@
+/*
+ * "Hello World" example.
+ *
+ * This example prints 'Hello from Nios II' to the STDOUT stream. It runs on
+ * the Nios II 'standard', 'full_featured', 'fast', and 'low_cost' example
+ * designs. It runs with or without the MicroC/OS-II RTOS and requires a STDOUT
+ * device in your system's hardware.
+ * The memory footprint of this hosted application is ~69 kbytes by default
+ * using the standard reference design.
+ *
+ * For a reduced footprint version of this template, and an explanation of how
+ * to reduce the memory footprint for a given application, see the
+ * "small_hello_world" template.
+ *
+ */
+
+#include <stdio.h>
+
+#include "io.h"
+#include "alt_types.h"
+#include "sys/alt_irq.h"
+#include "sys/alt_stdio.h"
+#include "system.h"
+#include <unistd.h>
+#include <string.h>
+
+#include <altera_avalon_pio_regs.h>
+
+int value;
+float norm_voltage=10;//  2^1 per togliere i primi 2 bit=0, 5 è il guadagno
+float norm_current=67076096;// 2^15=32768 per togliere i primi 16 bit=0, 184.8 è il guadagno
+int status_spi_a, status_spi_b, status_spi_c;
+int status_vc_a1, status_vc_a2,status_vc_b1, status_vc_b2,status_vc_c1, status_vc_c2;
+float current_norm, voltage_norm;
+
+int voltage;
+int current;
+int mask_voltage=0b00000000000000000011111111111100; //last 4 bits to be filtered
+int mask_current=0b00111111111111000000000000000000;
+
+int switching_signals=0;
+int timer_value;
+int startup_expired=0;
+int protection_register=0b00; // bit 1: overcurrent, bit 0 unbalanced voltages
+int end_control=0;
+int protection_on=0;
+
+int count=0;
+
+int i=0;
+int j=0;
+
+
+int main()
+{
+	printf("Hello from Nios II!\n");
+
+
+
+// SETTINGS
+	IOWR_ALTERA_AVALON_PIO_DATA(DELAY_SPI_BASE, 60);// SPI delay between cs assertion and 1th spi clk pulse
+
+	IOWR_ALTERA_AVALON_PIO_DATA(SPI_TX_0, 10);// Write to SPI register 0
+
+
+	// SPI COMMUNICATION
+	IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0b000001); // start spi communications
+	   do{
+	   	   status_spi_a=IORD_ALTERA_AVALON_PIO_DATA(END_SPI_BASE);
+	   }
+	   while( status_spi_a==0 );// wait end communications
+
+	   uint16_t spi_data = IOWR_ALTERA_AVALON_PIO_DATA(START_SPI_BASE, 0); // end spi communications
+
+
+	    printf("SPI register 0 data: %u\n", spi_data); // Prints in hexadecimal format
+
+	   while(1){
+
+
+	}
+  return 0;
+}

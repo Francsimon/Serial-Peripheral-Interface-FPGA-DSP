@@ -1,0 +1,17 @@
+Analysis & Synthesis Status : Successful - Fri Dec 13 12:09:27 2024
+Quartus Prime Version : 17.1.0 Build 590 10/25/2017 SJ Lite Edition
+Revision Name : Spi_minimized_delay_top
+Top-level Entity Name : spi_minimized_delay_top
+Family : Cyclone V
+Logic utilization (in ALMs) : N/A
+Total registers : 2598
+Total pins : 26
+Total virtual pins : 0
+Total block memory bits : 811,264
+Total DSP Blocks : 0
+Total HSSI RX PCSs : 0
+Total HSSI PMA RX Deserializers : 0
+Total HSSI TX PCSs : 0
+Total HSSI PMA TX Serializers : 0
+Total PLLs : 0
+Total DLLs : 0
