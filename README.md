@@ -65,44 +65,27 @@ This project was developed with the following platforms:
 
 ### Steps
 
-1. From FPGA side, import SPI_Nios_project in Quartus Prime.
+1. From the FPGA side, import SPI_Nios_project in Quartus Prime.
    You will find a main code employing two components:
    - The SPI master module;
    - The Nios II soft processor.
-   You can have a look at the Platform Designer to see the connections among Nios II, JTAG programmer, RAM memory and the main registers.
-   You can have a look at the SPI master module to understand what are the inputs and the possible operating modes (clock phase and polarities, delays, word length).
+   You can look at the Platform Designer to see the connections among Nios II, the JTAG programmer, RAM memory and the main registers.
+   You can look at the SPI master module to understand the inputs and the possible operating modes (clock phase and polarities, delays, word length).
 
 2. In the Quartus Prime window, navigate to Tools -> Nios II Software Build Tools for Eclipse.
    Select ./SPI_NIOS_project/software as workspace.
-   In the Project Explorer on the left, right click on the soft_bsp folder. Click on Nios -> Generate BSP.
-   Then, right click on the soft folder. Click on Build Project, and Run As -> Nios II Hardware to run the code.
+   In the Project Explorer, on the left, right-click on the soft_bsp folder. Click on Nios -> Generate BSP.
+   Then, right-click on the soft folder. Click on Build Project and Run As -> Nios II Hardware to run the code.
 
-3. From DSP side, import spi_adc_minimized_delay in Code Composer Studio. Than, Build and Flash.
+3. From the DSP side, import spi_adc_minimized_delay in Code Composer Studio. Then, Build and Flash.
 
 ---
 
 ## Usage Instructions
 
-### Running Locally
-
-After following the installation steps, you can run the project locally using:
-
-```bash
-npm start
-```
-
-The application will be available at [http://localhost:3000](http://localhost:3000).
-
-### Deployment
-
-For deploying to a production environment:
-
-1. Build the production version:
-   ```bash
-   npm run build
-   ```
-
-2. Deploy the contents of the `dist` or `build` folder to your server or hosting provider.
+From the Eclipse window opened through Quartus Prime, you can modify the C code executed by Nios II. You can send data via SPI, read received data and start communications in parallel.
+From Code Composer Studio, you can adapt the code to your implementation by employing the communication scheme that minimizes the sample & transmission delays.
+You can modify the provided code to develop your own implementation, taking advantage of the optimized sample & transmission of the data.
 
 ---
 
@@ -118,8 +101,3 @@ We welcome contributions! To contribute:
 
 Please follow our [Code of Conduct](CODE_OF_CONDUCT.md) and [Contributing Guidelines](CONTRIBUTING.md).
 
----
-
-## License
-
-This project is licensed under the [MIT License](LICENSE). See the LICENSE file for details.
