@@ -23,6 +23,10 @@ It contains two files:
 ## Author
 * **Francesco Simonetti**, PhD, Research Assistant at Aalborg University, Denmark.
 
+ORCID: https://orcid.org/0000-0002-1135-052X
+
+ResearchGate: https://www.researchgate.net/profile/Francesco_Simonetti4
+
 ---
 
 ## Overview
@@ -104,8 +108,5 @@ You can refer to the paper:
 
 F. Simonetti, M. Dezhbord, S. Mohamadian, A. D’Innocenzo, C. Cecati and R. Di Fonso, "Optimized DSP-FPGA Communication in CHB-STATCOM with Direct MPC," 2024 IEEE Energy Conversion Congress and Exposition (ECCE), Phoenix, AZ, USA, 2024, pp. 3997-4002, doi: 10.1109/ECCE55643.2024.10861606.
 
-ORCID: https://orcid.org/0000-0002-1135-052X
-
-ResearchGate: https://www.researchgate.net/profile/Francesco_Simonetti4
 
 
