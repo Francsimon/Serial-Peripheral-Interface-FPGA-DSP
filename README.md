@@ -21,8 +21,10 @@ It contains two files:
 --- 
 
 ## Author
-* **Francesco Simonetti**, PhD, Research Assistant at Aalborg University, Denmark.
+**Francesco Simonetti**, PhD, Research Assistant at Aalborg University, Denmark.
+  
 ORCID: https://orcid.org/0000-0002-1135-052X
+
 ResearchGate: https://www.researchgate.net/profile/Francesco_Simonetti4
 
 ---
